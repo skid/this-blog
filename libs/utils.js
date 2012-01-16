@@ -1,4 +1,5 @@
 var crypto    = require('crypto');
+var mime      = require('mime');
 var path      = require('path');
 var fs        = require('fs');
 var marked    = require('marked');
