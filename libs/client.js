@@ -1,4 +1,3 @@
-var settings  = global.settings;
 var cache     = global.cache;
 var crypto    = require('crypto');
 var mime      = require('mime');
@@ -9,9 +8,9 @@ var utils     = require('./utils');
 var reqOpts   = {
   connection: "Keep-Alive",
   method:     "GET",
-  host:       settings.server,
-  port:       settings.port,
-  path:       settings.adminUrl,
+  host:       global.settings.server,
+  port:       global.settings.port,
+  path:       global.settings.adminUrl,
 }
 
 /**
@@ -46,7 +45,7 @@ function upload(localChecksums, remoteChecksums) {
   
   // Remove
   Object.keys(remoteChecksums).forEach(function(filename){
-    var data = "", options = utils.extend(reqOpts, { method: "DELETE", headers: { password: settings.password, filename: filename } });
+    var data = "", options = utils.extend(reqOpts, { method: "DELETE", headers: { password: global.settings.password, filename: filename } });
     
     var req = http.request(options, function(res){
       res.on('data', function (chunk) { 
@@ -82,7 +81,7 @@ function upload(localChecksums, remoteChecksums) {
         "headers":  { 
           "content-length": stat.size,
           "content-type":   lookupMime(filename),
-          "password":       settings.password, 
+          "password":       global.settings.password, 
           "filename":       filename 
       }});
       req = http.request(options, function(res){
@@ -107,7 +106,7 @@ function upload(localChecksums, remoteChecksums) {
  * and calls the upload function which will take care of the rest.
  */
 exports.publish = function(){
-  var options   = utils.extend(reqOpts, { headers: { password: settings.password, filename: "" } });
+  var options   = utils.extend(reqOpts, { headers: { password: global.settings.password, filename: "" } });
   var checksums = {};
   var req, data = "";
   

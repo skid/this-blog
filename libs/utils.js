@@ -4,12 +4,11 @@ var fs        = require('fs');
 var marked    = require('marked');
 var connect   = require('connect');
 var templates = {};
-var settings  = global.settings;
 var cache     = global.cache;
 var icon;
 
 function formatDate(date, lang) {
-  return settings.strings[lang].months[date.getMonth()] + " " + date.getDate() + ", " + date.getFullYear();
+  return global.settings.strings[lang].months[date.getMonth()] + " " + date.getDate() + ", " + date.getFullYear();
 }
 function slugify(name) {
   return name.toLowerCase().replace(/\s+/g, "-");
@@ -78,7 +77,7 @@ exports.deleteFile = function(filename, callback){
     var name    = chunks[0].split("/");
         name    = name.length > 1 ? name[name.length-1] : name[0];
     var slug    = slugify(name);
-    var lang    = chunks.length === 3 ? chunks[1] : settings.languages[0];
+    var lang    = chunks.length === 3 ? chunks[1] : global.settings.languages[0];
 
     delete cache.posts[slug][lang];
 
@@ -174,10 +173,10 @@ exports.updatePost = function(stream, filename, options, callback) {
     var name    = chunks[0].split("/");
         name    = name.length > 1 ? name[name.length-1] : name[0];
     var slug    = slugify(name);
-    var lang    = chunks.length === 3 ? chunks[1] : settings.languages[0];
+    var lang    = chunks.length === 3 ? chunks[1] : global.settings.languages[0];
     var headers = {
-      link:       "/" + lang + settings.postsUrl + "/" + slug,
-      permalink:  settings.server + (settings.port !== 80 ? ":" + settings.port : "") + "/" + lang + settings.postsUrl + "/" + slug,
+      link:       "/" + lang + global.settings.postsUrl + "/" + slug,
+      permalink:  global.settings.server + (global.settings.port !== 80 ? ":" + global.settings.port : "") + "/" + lang + global.settings.postsUrl + "/" + slug,
       title:      name
     };
     var post    = {
@@ -273,8 +272,8 @@ exports.updatePost = function(stream, filename, options, callback) {
     cache.order.sort(function(a, b){
       a = cache.posts[a];
       b = cache.posts[b];
-      a = a[settings.languages[0]] || a[settings.languages[1]];
-      b = b[settings.languages[0]] || b[settings.languages[1]];
+      a = a[global.settings.languages[0]] || a[global.settings.languages[1]];
+      b = b[global.settings.languages[0]] || b[global.settings.languages[1]];
       return (+b.meta.date || 0) - (+a.meta.date || 0);
     });
 

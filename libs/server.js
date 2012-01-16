@@ -9,7 +9,6 @@ var util      = require('util');
 var url       = require('url');
 var fs        = require('fs');
 var connect   = require('connect');
-var settings  = global.settings; 
 var cache     = global.cache;
 var main      = connect();
 
@@ -20,8 +19,8 @@ var main      = connect();
  * Markdown file's mimes will always be text/markdown.
  * Text files' mimes will always be text/something.
  */
-main.use(settings.adminUrl, function(req, res, next){
-  if(req.headers.password !== settings.password) {
+main.use(global.settings.adminUrl, function(req, res, next){
+  if(req.headers.password !== global.settings.password) {
     return next(404);
   }
   
@@ -76,8 +75,8 @@ main.use('/', function(req, res, next){
   }
   // Get language or redirect to default language
   var chunks = parsed.pathname.split("/");
-  if( !~settings.languages.indexOf(chunks[1]) ) {
-    chunks.splice(1, 0, settings.languages[0]);
+  if( !~global.settings.languages.indexOf(chunks[1]) ) {
+    chunks.splice(1, 0, global.settings.languages[0]);
     parsed.pathname = chunks.join("/");
     res.writeHead(301, { 'Location': url.format( parsed ) });
     return res.end();
@@ -92,21 +91,21 @@ main.use('/', function(req, res, next){
  */
 main.use('/', function(req, res, next){
   req.context = {
-    menus:    settings.sitemenus.map(function(menu){
+    menus:    global.settings.sitemenus.map(function(menu){
                 var list = (cache.menus[menu] || []).map(function(slug){
                   var post = cache.posts[slug] && cache.posts[slug][req.language];
-                  return post ? "<li><a href='/" + req.language + settings.postsUrl + "/" + slug + "'>" + post.meta.title + "</a></li>" : "";
+                  return post ? "<li><a href='/" + req.language + global.settings.postsUrl + "/" + slug + "'>" + post.meta.title + "</a></li>" : "";
                 }).join("");
-                return list ? [ "<h3>", settings.strings[req.language][menu] || "", "</h3>", "<ul class='unstyled'>", list, "</ul>" ].join("") : "";
+                return list ? [ "<h3>", global.settings.strings[req.language][menu] || "", "</h3>", "<ul class='unstyled'>", list, "</ul>" ].join("") : "";
               }).join(""),
-    tags:     "<h3>" + settings.strings[req.language].tags + "</h3>" +
+    tags:     "<h3>" + global.settings.strings[req.language].tags + "</h3>" +
               "<ul class='unstyled'>" +
                 Object.keys(cache.tags).map(function(tag){
-                  return "<li><a href='/" + req.language +  settings.tagsUrl + "/" + tag + "'>" + (tag.charAt(0).toUpperCase() + tag.slice(1)) + "</a></li>";
+                  return "<li><a href='/" + req.language +  global.settings.tagsUrl + "/" + tag + "'>" + (tag.charAt(0).toUpperCase() + tag.slice(1)) + "</a></li>";
                 }).join("") + 
               "</ul>",
-    strings:  settings.strings[req.language],
-    settings: settings
+    strings:  global.settings.strings[req.language],
+    settings: global.settings
   };
   next();
 });
@@ -114,7 +113,7 @@ main.use('/', function(req, res, next){
 /* 
  * Handles post views.
  */
-main.use(settings.postsUrl, function(req, res, next){  
+main.use(global.settings.postsUrl, function(req, res, next){  
   var post, chunks = req.url.split("/"), slug = chunks[1];
 
   /* We expect something like "/post-slug" */
@@ -136,12 +135,12 @@ main.use(settings.postsUrl, function(req, res, next){
 
   req.context.content     = "<span class='label date'>" + post.meta.fdate + "</span><h1>" + post.meta.title + "</h1>" + post.content;
   req.context.title       = post.meta.title;
-  req.context.author      = post.meta.author || settings.strings[req.language].author;
+  req.context.author      = post.meta.author || global.settings.strings[req.language].author;
   req.context.description = post.meta.description;
   req.context.languages   = [
     "<ul class='unstyled'>",
       Object.keys(cache.posts[slug]).map(function(lang){
-        return lang !== req.language ? "<li><a href='/" + lang + settings.postsUrl + "/" + slug + "' class='lang " + lang + "'>" + settings.langinfo[lang] + "</a></li>" : "";
+        return lang !== req.language ? "<li><a href='/" + lang + global.settings.postsUrl + "/" + slug + "' class='lang " + lang + "'>" + global.settings.langinfo[lang] + "</a></li>" : "";
       }).join(""),
     "</ul>"
   ].join("");
@@ -162,31 +161,31 @@ function list(req, res, next, tag){
         '<div class="chapter-options clearfix"><span class="label date">', post.meta.fdate, '</span></div>',
         '<h2><a href="', post.meta.link, '">', post.meta.title, '</a></h2>',
         '<div class="chapter-excerpt">', post.excerpt, '</div>',
-        '<div class="chapter-footer"><a href="', post.meta.link, '">', settings.strings[req.language].entire_post, ' &raquo;</a></div>'
+        '<div class="chapter-footer"><a href="', post.meta.link, '">', global.settings.strings[req.language].entire_post, ' &raquo;</a></div>'
       );
-      if(++j >= settings.maxhomepage) {
+      if(++j >= global.settings.maxhomepage) {
         break;
       }
     }
   }
   excerpts = excerpts.join("");
   if(!excerpts) {
-    excerpts = "<h2>" + settings.strings[req.language].empty_list + "</h2>";
+    excerpts = "<h2>" + global.settings.strings[req.language].empty_list + "</h2>";
   }
 
   req.context.content     = excerpts;
-  req.context.title       = settings.strings[req.language].homepage;
-  req.context.author      = settings.strings[req.language].author;
-  req.context.description = settings.strings[req.language].description;
+  req.context.title       = global.settings.strings[req.language].homepage;
+  req.context.author      = global.settings.strings[req.language].author;
+  req.context.description = global.settings.strings[req.language].description;
   req.context.languages   = "<ul class='unstyled'>" +
-                              settings.languages.map(function(lang){ 
-                                return "<li><a href='/" + lang + "' class='lang " + lang + "'>" + settings.langinfo[lang] + "</a></li>"; 
+                              global.settings.languages.map(function(lang){ 
+                                return "<li><a href='/" + lang + "' class='lang " + lang + "'>" + global.settings.langinfo[lang] + "</a></li>"; 
                               }).join("") +
                             "</ul>";
 }
 
 /* Render tag lists */
-main.use(settings.tagsUrl, function(req, res, next){
+main.use(global.settings.tagsUrl, function(req, res, next){
   var tag = req.url.substr(1);
   if(tag in cache.tags) {
     list(req, res, next, tag);
@@ -218,7 +217,7 @@ main.use('/', function(req, res, next){
 /* In the end show a 404 page */
 main.use('/', function(err, req, res, next){
   req.context = {
-    strings: settings.strings[req.language],
+    strings: global.settings.strings[req.language],
     content: err.status === 404 ? 404 : 500,
     title:   err.status === 404 ? "Not Found" : "Internal Server Error"
   }
