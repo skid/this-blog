@@ -35,6 +35,9 @@ else if(options.s || options.serve) {
         utils.updateFile(fs.ReadStream(path.join(__dirname, dir, filename)), dir + '/' + filename); 
       });
   });
+
+  // Settings file checksum
+  utils.updateFile(fs.ReadStream(path.join(__dirname, dir, 'settings.json')), 'settings.json'); 
   
   require('http').createServer(server).listen(global.settings.port);
   console.log("Serving this blog on " + global.settings.server + ":" + global.settings.port);

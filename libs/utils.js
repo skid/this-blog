@@ -146,10 +146,13 @@ exports.updateFile = function(stream, filename, options, callback) {
         delete templates[file];
       }
       fs.writeFile(file, data, 'utf-8', callback);
+      // Update settings
+      if(filename === 'settings.json') {
+        global.settings = JSON.parse(data);
+      }
     }
-    else if(callback) {
-      callback();
-    }
+
+    callback && callback();
   });
 }
 

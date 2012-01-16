@@ -111,6 +111,9 @@ exports.publish = function(){
   var checksums = {};
   var req, data = "";
   
+  console.log("Calculating settings checksum ...");
+  checksums['settings.json'] = crypto.createHash('sha1').update(fs.readFileSync(path.normalize(__dirname + '/../settings.json'))).digest('hex');
+  
   console.log("Calculating local checksums ...");
   ['templates', 'static', 'posts'].forEach(function(dir){
     fs.readdirSync(path.normalize(__dirname + '/../' + dir))
