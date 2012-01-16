@@ -230,11 +230,17 @@ exports.updatePost = function(stream, filename, options, callback) {
       if((!post.meta.tags || post.meta.tags.indexOf(tag) === -1) && index > -1) {
         cache.tags[tag].splice(index, 1);
       }
+      if(cache.tags[tag].length === 0){
+        delete cache.tags[tag];
+      }
     });
     Object.keys(cache.menus).forEach(function(menu){
       var index = cache.menus[menu].indexOf(slug);
       if((!post.meta.menus || post.meta.menus.indexOf(menu) === -1) && index > -1) {
         cache.menus[menu].splice(index, 1);
+      }
+      if(cache.menus[menu].length === 0){
+        delete cache.menus[menu];
       }
     });
     

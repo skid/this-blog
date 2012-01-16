@@ -9,7 +9,7 @@
   "password":    "AEUOBA$@*Yfaf4oiuh2Aa$DhQI$Dha48d40dA$Id881048dn1F$18hg4f1",
   "maxhomepage": 10,
   "languages":   ["en", "mk"],
-  "langinfo":    {"en": "English", "mk": "Македонски"},
+  "langinfo":    {"en": "English", "mk": "Macedonian"},
   "sitemenus":   ["bookmarks"],
   "strings":     {
     "en": {
@@ -19,7 +19,7 @@
       "bookmarks":      "Bookmarks",
       "projects":       "Projects",
       "tags":           "Tags",
-      "title":          "Discobots",
+      "title":          "Discobot",
       "tagline":        "A blog on many things, but mostly computers",
       "entire_post":    "Read entire post",
       "author":         "Dusko Jordanovski",
@@ -34,7 +34,7 @@
       "bookmarks":      "Букмаркс",
       "projects":       "Проекти",
       "tags":           "Тагови",
-      "title":          "Discobots",
+      "title":          "Discobot",
       "tagline":        "Блог за многу ствари, но највеќе за компутери",
       "entire_post":    "Прочитај го цел пост",
       "author":         "Душко Јордановски",

@@ -131,7 +131,13 @@ exports.publish = function(){
       data += chunk; 
     });
     res.on('end', function(){ 
-      upload(checksums, JSON.parse(data)); 
+      if(res.statusCode === 200) {
+        return upload(checksums, JSON.parse(data));
+      }
+      if(res.statusCode === 404) {
+        return  console.log("Not found. Did you change your password ?");
+      }
+      console.log("Error: " + res.statusCode);
     });
   });
   req.on('error', function(e){
