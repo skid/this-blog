@@ -1,20 +1,3 @@
-/**
- * Utils module - deals with filesystem, parsing and stuff.
- * Headers used by the system:
- * 
- * title          Post's title
- * date           Post's date in yyyy-mm-dd format
- * fdate          Post's date formatted by formatDate
- * description    Post's description that goes into the meta tag
- * tags           Post's tags
- * menu           Menus in which the post appears
- * 
- * Post object:
- *    { excerpt: "", content: "", meta: {} }
- *
- * Data object:
- *    { posts: {}, tags: {}, menus: {}, order: [] }
- */
 var crypto    = require('crypto');
 var path      = require('path');
 var fs        = require('fs');
@@ -31,6 +14,9 @@ function slugify(name) {
   return name.toLowerCase().replace(/\s+/g, "-");
 }
 
+/**
+ * Creates a new object and merges a and b into it.
+ */
 exports.extend = function(a, b) {
   var i, newobj = {};
   if(a && b) {
@@ -72,21 +58,6 @@ exports.favicon = function(req, res, next){
     }
     res.writeHead(200, icon.headers);
     res.end(icon.body);
-  });
-}
-
-/**
- * Takes a stream and calculates the hash. It also saves the stream.
- * This is used for templates and static files. For posts see updatePost.
- */
-exports.updateChecksum = function(stream, filename, callback) {
-  var data = "", hash = crypto.createHash('sha1');
-  stream.on('data', function(part){
-    hash.update(part);
-  });
-  stream.on('end', function(){
-    cache.checksums[filename] = hash.digest('hex');
-    callback && callback();
   });
 }
 

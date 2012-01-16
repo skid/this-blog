@@ -1,5 +1,6 @@
 var settings  = global.settings;
 var cache     = global.cache;
+var crypto    = require('crypto');
 var mime      = require('mime');
 var http      = require('http');
 var path      = require('path');
@@ -18,18 +19,10 @@ var reqOpts   = {
  */
 function lookupMime(filename){
   switch(filename.split(".").pop().toLowerCase()) {
-    case "md":
-      return 'text/markdown';
-      break;
-    case "less":
-      return 'text/less';
-      break;
-    case "js":
-      return 'text/javascript';
-      break;
-   default:
-      return mime.lookup(filename);
-      break;
+    case "md":    return 'text/markdown';
+    case "less":  return 'text/less';
+    case "js":    return 'text/javascript';
+    default:      return mime.lookup(filename);
   }
 }
 
@@ -37,11 +30,11 @@ function lookupMime(filename){
  * Calculates which files need to be uploaded or removed from the remote instance.
  * Uploads or deletes those files from remote instance.
  */
-function upload(remoteChecksums) {
+function upload(localChecksums, remoteChecksums) {
   var i, send = {};
-  for(i in cache.checksums) {
-    if(!(i in remoteChecksums) || remoteChecksums[i] !== cache.checksums[i]) {
-      send[i] = cache.checksums[i];
+  for(i in localChecksums) {
+    if(!(i in remoteChecksums) || remoteChecksums[i] !== localChecksums[i]) {
+      send[i] = localChecksums[i];
       delete remoteChecksums[i];
     }
     else if(i in remoteChecksums) {
@@ -49,92 +42,100 @@ function upload(remoteChecksums) {
     }
   }
   
+  console.log("\nDeleting " + Object.keys(remoteChecksums).length + " items.");
+  
   // Remove
   Object.keys(remoteChecksums).forEach(function(filename){
-    console.log("DELETE " + filename);
-    
-    var options = utils.extend(reqOpts, { method: "DELETE", headers: { password: settings.password, filename: filename } });
+    var data = "", options = utils.extend(reqOpts, { method: "DELETE", headers: { password: settings.password, filename: filename } });
     
     var req = http.request(options, function(res){
-      var data = "";
-      res.on('data', function (chunk) { data += chunk; });
-      res.on('end', function(){ console.log(data); });
-    });
-    req.on('error', function(e){
-      console.log("An error happened while deleting file " + filename + "; Try publishing again.");
-      console.log(e);
-    });
-    req.end();
-  });
-
-  // Send
-  Object.keys(send).forEach(function(filename){
-    var filepath = path.normalize(__dirname + '/../' + filename);    
-    fs.stat(filepath, function(error, stat) {
-      if (error) {
-        console.log("Error with local file: " + filename);
-        console.log(error);
-      }
-      else {
-        var options = utils.extend(reqOpts, { 
-          "method":   "PUT", 
-          "headers":  { 
-            "content-length": stat.size,
-            "content-type":   lookupMime(filename),
-            "password":       settings.password, 
-            "filename":       filename 
-        }});
-        var req = http.request(options, function(res){
-          var data = "";
-          res.on('data', function (chunk) { data += chunk; });
-          res.on('end', function(){ console.log( data ); });
-        });
-        req.on('error', function(e){
-          console.log("An error happened while sending file " + filename + "; Try publishing again.");
-          console.log(e);
-        });
-        fs.ReadStream(filepath).pipe(req);
-      }
-    });    
-  });
-}
-
-exports.publish = function(){
-  var counter = 0;
-  var options = utils.extend(reqOpts, { headers: { password: settings.password, filename: "" } });
-  
-  // Executed once when all checksums are calculated.
-  // Shoots a request to get the remote checksums, compares them and does the rest of the job.
-  function makeRequest(){
-    if(--counter) {
-      return;
-    }
-    var req = http.request(options, function(res){
-      var data = "";
       res.on('data', function (chunk) { 
         data += chunk; 
       });
       res.on('end', function(){ 
-        upload( JSON.parse(data) ); 
+        console.log(data); 
       });
-    })
+    });
     req.on('error', function(e){
-      console.log("An error happened while getting the remote checksums; Try publishing again or check if your server is online.");
-      console.log(e);
-      process.exit(1);
+      console.log("An error happened while deleting file " + filename + "; Try publishing again.");
+      console.log("Error Code: " + e.code || e.errno);
     });
     req.end();
-  };
+  });
+
+  console.log("Uploading " + Object.keys(send).length + " items.\n");
+
+  // Send
+  Object.keys(send).forEach(function(filename){
+    var filepath = path.normalize(__dirname + '/../' + filename);    
+    
+    fs.stat(filepath, function(e, stat) {
+      var options, req, data = "";
+      
+      if (e) {
+        console.log("Error with local file: " + filename);
+        console.log("Error Code: " + e.code || e.errno);
+        return;
+      }
+      options = utils.extend(reqOpts, { 
+        "method":   "PUT", 
+        "headers":  { 
+          "content-length": stat.size,
+          "content-type":   lookupMime(filename),
+          "password":       settings.password, 
+          "filename":       filename 
+      }});
+      req = http.request(options, function(res){
+        res.on('data', function (chunk) { 
+          data += chunk; 
+        });
+        res.on('end', function(){ 
+          console.log( data ); 
+        });
+      });
+      req.on('error', function(e){
+        console.log("An error happened while sending file " + filename + "; Try publishing again.");
+        console.log("Error Code: " + e.code || e.errno);
+      });
+      fs.ReadStream(filepath).pipe(req);
+    });    
+  });
+}
+
+/**
+ * Calculates local checksums, fetches remote checksums
+ * and calls the upload function which will take care of the rest.
+ */
+exports.publish = function(){
+  var options   = utils.extend(reqOpts, { headers: { password: settings.password, filename: "" } });
+  var checksums = {};
+  var req, data = "";
   
-  // Reads all local files, calculates checksums and calls makeRequest, which takes over
+  console.log("Calculating local checksums ...");
   ['templates', 'static', 'posts'].forEach(function(dir){
     fs.readdirSync(path.normalize(__dirname + '/../' + dir))
       .filter(function(filename){ 
         return filename[0] !== '.'; 
       })
       .forEach(function(filename){
-        ++counter;
-        utils.updateChecksum(fs.ReadStream(path.normalize(__dirname + '/../' + dir + '/' + filename)), dir + '/' + filename, makeRequest);    
+        filename = dir + '/' + filename;        
+        checksums[filename] = crypto.createHash('sha1').update(fs.readFileSync(path.normalize(__dirname + '/../' + filename))).digest('hex');
       });
   });
+  
+  console.log("Fetching remote checksums ...");
+  req = http.request(options, function(res){
+    res.on('data', function (chunk) { 
+      data += chunk; 
+    });
+    res.on('end', function(){ 
+      upload(checksums, JSON.parse(data)); 
+    });
+  });
+  req.on('error', function(e){
+    console.log("An error happened while fetching remote checksums; Check if your server is online.");
+    console.log("Error Code: " + e.code || e.errno);
+    process.exit(1);
+  });
+  req.end();
 }

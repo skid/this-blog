@@ -14,16 +14,18 @@ var cache     = global.cache;
 var main      = connect();
 
 /* 
- * We use this URL to manage the posts with the client 
- * Markdown file's mimes will always be text/markdown
- * Text files' mimes will always be text/something
+ * This is the admin layer that handles requests from the client.
+ * You manage This Blog by sending or deleting files.
+ *
+ * Markdown file's mimes will always be text/markdown.
+ * Text files' mimes will always be text/something.
  */
 main.use(settings.adminUrl, function(req, res, next){
   if(req.headers.password !== settings.password) {
     return next(404);
   }
   
-  // Get the served files' checksums
+  // Get the served files' checksums to decide what files need to be sent.
   if(req.method === 'GET'){
     var json = JSON.stringify(cache.checksums);
     res.writeHead(200, { 'content-type': 'text/json', 'content-length': Buffer.byteLength(json) });
@@ -40,9 +42,10 @@ main.use(settings.adminUrl, function(req, res, next){
       'text': req.headers['content-type'].split("/")[0] === 'text',
       'size': parseInt(req.headers['content-length'] || 0, 10)
     }
-    update = req.headers['content-type'] === 'text/markdown' ? utils.updatePost : utils.updateFile;
+
+    var update = req.headers['content-type'] === 'text/markdown' ? utils.updatePost : utils.updateFile;
     update(req, req.headers['filename'], options, function(){
-      res.end("Received file: '" + req.headers['filename']);
+      res.end("Received file: '" + req.headers['filename'] + "'");
     });
   }
 
@@ -54,11 +57,14 @@ main.use(settings.adminUrl, function(req, res, next){
   }
 });
 
-/* Serve static content before all */
+
+/* Serve static content and favicon */
 main.use('/favicon.ico', utils.favicon);
 main.use('/static', connect.static(path.normalize(__dirname + '/../static'), {maxAge: 86400000 * 365 }));
 
-/* Always redirect to the same url without trailing slash */
+/* Redirects to the same url without trailing slash.
+ * Detects language or redirects to the default language.
+ */
 main.use('/', function(req, res, next){
   var parsed = url.parse( req.url );
   if(req.method === 'GET' && (/.+\/+$/).test( parsed.pathname )) {
@@ -79,7 +85,9 @@ main.use('/', function(req, res, next){
   return next();
 });
 
-/* Build Sidebar and create context */
+/* 
+ * Builds the sidebar and creates context 
+ */
 main.use('/', function(req, res, next){
   req.context = {
     menus:    settings.sitemenus.map(function(menu){
@@ -89,20 +97,20 @@ main.use('/', function(req, res, next){
                 }).join("");
                 return list ? [ "<h3>", settings.strings[req.language][menu] || "", "</h3>", "<ul class='unstyled'>", list, "</ul>" ].join("") : "";
               }).join(""),
-    tags:     [
-                "<h3>", settings.strings[req.language].tags, "</h3>",
-                "<ul class='unstyled'>",
-                  Object.keys(cache.tags).map(function(tag){
-                    return "<li><a href='/" + req.language +  settings.tagsUrl + "/" + tag + "'>" + (tag.charAt(0).toUpperCase() + tag.slice(1)) + "</a></li>";
-                  }).join(""),
-                "</ul>"
-              ].join(""),
+    tags:     "<h3>" + settings.strings[req.language].tags + "</h3>" +
+              "<ul class='unstyled'>" +
+                Object.keys(cache.tags).map(function(tag){
+                  return "<li><a href='/" + req.language +  settings.tagsUrl + "/" + tag + "'>" + (tag.charAt(0).toUpperCase() + tag.slice(1)) + "</a></li>";
+                }).join("") + 
+              "</ul>",
     strings:  settings.strings[req.language]
   };
   next();
 });
 
-/* Post page */
+/* 
+ * Handles post views.
+ */
 main.use(settings.postsUrl, function(req, res, next){  
   var post, chunks = req.url.split("/"), slug = chunks[1];
 
@@ -138,7 +146,9 @@ main.use(settings.postsUrl, function(req, res, next){
   next();
 });
 
-/* Home/Tag page */
+/* 
+ * Handles list views (homepage and tag)
+ */
 function list(req, res, next, tag){
   var i=0, j=0, post, slug, excerpts = [];
   var tags = cache.tags[tag] || null;
@@ -160,18 +170,16 @@ function list(req, res, next, tag){
   if(!excerpts) {
     excerpts = "<h2>" + settings.strings[req.language].empty_list + "</h2>";
   }
-  
+
   req.context.content     = excerpts;
   req.context.title       = settings.strings[req.language].homepage;
   req.context.author      = settings.strings[req.language].author;
   req.context.description = settings.strings[req.language].description;
-  req.context.languages   = [
-    "<ul class='unstyled'>",
-      settings.languages.map(function(lang){
-        return "<li><a href='/" + lang + "' class='lang " + lang + "'>" + settings.langinfo[lang] + "</a></li>";
-      }).join(""),
-    "</ul>"
-  ].join("");
+  req.context.languages   = "<ul class='unstyled'>" +
+                              settings.languages.map(function(lang){ 
+                                return "<li><a href='/" + lang + "' class='lang " + lang + "'>" + settings.langinfo[lang] + "</a></li>"; 
+                              }).join("") +
+                            "</ul>";
 }
 
 /* Render tag lists */
@@ -205,5 +213,11 @@ main.use('/', function(req, res, next){
 });
 
 /* In the end show a 404 page */
-main.use('/', function(req, res, next){ next(404); });
+main.use('/', function(req, res, next, err){ 
+  req.context.content = err === 404 ? 404 : 500;
+  req.context.title   = err === 404 ? "Not Found" : "Internal Server Error";
+  utils.template(path.normalize(__dirname + "/../templates/error.html"), req.context, function(err, html){
+    return res.end(html);
+  });
+});
 module.exports = main;
