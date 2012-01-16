@@ -41,7 +41,7 @@ exports.serveFile = function(path, headers){
   return function(req, res, next){
     fs.readFile(path, function(err, buf){
       if (err) {
-        return next(err);
+        return next(err.code === 'ENOENT' ? 404 : err);
       }
       headers['Content-Length'] = buf.length;
       headers['Content-Type'] = mime.lookup(path);
