@@ -82,12 +82,23 @@ exports.deleteFile = function(filename, callback){
     delete cache.posts[slug][lang];
 
     if(Object.keys(cache.posts[slug]).length === 0){
-      if(~cache.tags.indexOf(slug)){
-        cache.tags.splice(cache.tags.indexOf(slug), 1);
+      var i;
+      for(i in cache.tags){
+        if(~cache.tags[i].indexOf(slug)){
+          cache.tags[i].splice(cache.tags[i].indexOf(slug), 1);
+        }
+        if(cache.tags[i].length === 0){
+          delete cache.tags[i];
+        }
       }
-      if(~cache.menus.indexOf(slug)){
-        cache.menus.splice(cache.menus.indexOf(slug), 1);
-      } 
+      for(i in cache.menus){
+        if(~cache.menus[i].indexOf(slug)){
+          cache.menus[i].splice(cache.menus[i].indexOf(slug), 1);
+        }
+        if(cache.menus[i].length === 0){
+          delete cache.menus[i];
+        }
+      }
     }
   }
   callback && callback();
