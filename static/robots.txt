@@ -1,0 +1,6 @@
+Allow: *
+
+Disallow: /harming/humans
+Disallow: /harm/to/self
+Disallow: /ignoring/human/orders
+

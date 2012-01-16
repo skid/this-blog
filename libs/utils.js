@@ -35,8 +35,7 @@ exports.extend = function(a, b) {
 }
 
 /**
- * Custom favicon server, because the one from connect 
- * does not work with trailing slashes.
+ * Serves static files on custom URLs like /favicon.ico and /robots.txt.
  */
 exports.serveFile = function(path, headers){
   return function(req, res, next){

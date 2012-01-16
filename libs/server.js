@@ -226,7 +226,7 @@ main.use('/', function(req, res, next){
     }
     urlcache[req.origUrl] = {
       headers: {
-        'Content-Type':   'text/html',
+        'Content-Type':   'text/html; charset=UTF-8',
         'Content-Length':  Buffer.byteLength(html)
       },
       body: html
