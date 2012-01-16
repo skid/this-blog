@@ -222,7 +222,7 @@ main.use('/', function(err, req, res, next){
     title:   err.status === 404 ? "Not Found" : "Internal Server Error"
   }
   utils.template(path.normalize(__dirname + "/../templates/error.html"), req.context, function(error, html){
-    err = err || error;
+    console.log(err, error, html);
     res.writeHead(err.status || err.statusCode);
     res.end(html || "500 Internal Server Error");
   });
