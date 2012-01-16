@@ -2,6 +2,7 @@ var crypto    = require('crypto');
 var path      = require('path');
 var fs        = require('fs');
 var marked    = require('marked');
+var connect   = require('connect');
 var templates = {};
 var settings  = global.settings;
 var cache     = global.cache;
@@ -50,10 +51,10 @@ exports.favicon = function(req, res, next){
     icon = {
       body: buf,
       headers: {
-        'Content-Type': 'image/x-icon', 
         'Content-Length': buf.length, 
-        'ETag': '"' + connect.utils.md5(buf) + '"', 
-        'Cache-Control': 'public, max-age=' + (84600 * 365) 
+        'Content-Type':   'image/x-icon', 
+        'Cache-Control':  'public, max-age=' + (84600 * 365),
+        'ETag':           '"' + connect.utils.md5(buf) + '"'
       }
     }
     res.writeHead(200, icon.headers);
@@ -324,12 +325,8 @@ exports.template = function(template, post, callback){
     if(err) {
       return callback(err);
     }
-    var tmpl = data.toString('utf-8')
-                   .replace(/(^\n+)|(\n+$)/, '')
-                   .split(/(\{\{.*?\}\})/)
-                   .map(function(token){ 
-                   	 return /^\{\{.*?\}\}$/.test(token) ? token.replace(/^\{\{ *| *\}\}$/g, '').split(".") : token; 
-                   });
+    var tmpl = data.toString('utf-8').replace(/(^\n+)|(\n+$)/, '').split(/(\{\{.*?\}\})/)
+                   .map(function(token){ return /^\{\{.*?\}\}$/.test(token) ? token.replace(/^\{\{ *| *\}\}$/g, '').split(".") : token; });
     return callback(null, render(templates[template] = tmpl, post));
   });
 }

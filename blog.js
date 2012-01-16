@@ -40,9 +40,11 @@ else if(options.s || options.serve) {
   console.log("Serving this blog on " + global.settings.server + ":" + global.settings.port);
 }
 else {
-  console.log("\nUsage:\n");
-  console.log("blog.js --serve (or -s) to start the server.");
-  console.log("blog.js --publish (or -p) to publish your latest changes.");
-  console.log("Edit the blog.js file to change the settings.");
+  console.log("");
+  console.log("Usage:");
+  console.log("");
+  console.log("blog.js --serve (-s) to start the server.");
+  console.log("blog.js --publish (-p) to publish your latest changes.");
+  console.log("Edit settings.json to change settings.");
   console.log("");
 }

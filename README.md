@@ -8,8 +8,8 @@
 
 ### TODOs
 
-- Delete files and posts
 - Load and read settings.json
+- Optimize (Seems like IO is blocking somewhere)
 - Logging / Analytics
 - Package.json
 - Publish
