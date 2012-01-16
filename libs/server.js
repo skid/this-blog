@@ -26,7 +26,7 @@ main.use(settings.adminUrl, function(req, res, next){
   // Get the served files' checksums
   if(req.method === 'GET'){
     var json = JSON.stringify(cache.checksums);
-    res.writeHead(200, { 'content-type': 'text/json', 'content-length', Buffer.byteLength(json) });
+    res.writeHead(200, { 'content-type': 'text/json', 'content-length': Buffer.byteLength(json) });
     res.end(json);
   }
   
