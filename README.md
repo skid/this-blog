@@ -7,7 +7,6 @@
 ### TODOs
 
 - Add Pagination to lists
-- Optimize (Seems like IO is blocking somewhere or something is not cached)
 - Log all uncommon errors
 - Package.json
 - Publish

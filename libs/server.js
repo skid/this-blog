@@ -224,6 +224,7 @@ main.use('/', function(req, res, next){
     if(err) {
       return next(err.code === "ENOENT" ? 404 : 500);
     }
+    console.log("ASD")
     urlcache[req.origUrl] = {
       headers: {
         'Content-Type':   'text/html; charset=UTF-8',
