@@ -48,7 +48,7 @@ exports.serveFile = function(path, headers){
       headers['Content-Type'] = mime.lookup(path);
       headers['Etag'] = connect.utils.md5(buf);
       res.writeHead(200, headers);
-      res.end(bug);
+      res.end(buf);
     });
   }
 }
