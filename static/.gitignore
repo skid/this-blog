@@ -1,1 +1,6 @@
 [^.]*
+!bg.png
+!bg2.jpg
+!scripts.js
+!style.css
+!favicon.ico

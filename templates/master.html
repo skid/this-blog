@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}} - {{strings.title}}</title>
+    <meta name="description" content="{{description}}">
+    <meta name="author" content="{{author}}">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]><script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+    <link href="/static/style.css" rel="stylesheet">    
+    <!-- Le fav and touch icons -->
+    <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/static/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/static/apple-touch-icon-114x114.png">
+  </head>
+
+  <body>
+    <div class="container">
+      <!-- Main hero unit for a primary marketing message or call to action -->
+      <div class="page-header">
+        <h1><a href="/">{{strings.title}} <small>{{strings.tagline}}</small></a></h1>
+      </div>
+      <!-- Example row of columns -->
+      <div class="row">
+        <div class="span11 homepage-content">
+          {{content}}
+          {{pagination}}
+        </div>
+        <div class="span4 offset1 sidebar">
+          {{languages}}
+          {{menus}}
+          {{tags}}
+        </div>
+      </div>
+      <footer>
+        <p>&copy; {{strings.author}} 2011</p>
+      </footer>
+    </div> <!-- /container -->
+    <script>
+      var _gaq = [['_setAccount', '{{settings.gaCode}}'], ['_trackPageview']];
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+  </body>
+</html>

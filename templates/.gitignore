@@ -1,1 +1,4 @@
 [^.]*
+!error.html
+!master.html
+!pagination.html

@@ -10,6 +10,7 @@ var url       = require('url');
 var fs        = require('fs');
 var connect   = require('connect');
 var cache     = global.cache;
+var urlcache  = {};
 var main      = connect();
 
 /* 
@@ -43,6 +44,7 @@ main.use(global.settings.adminUrl, function(req, res, next){
 
     var update = req.headers['content-type'] === 'text/markdown' ? utils.updatePost : utils.updateFile;
     update(req, req.headers['filename'], options, function(){
+      urlcache = {};
       res.end("Received file: '" + req.headers['filename'] + "'");
     });
   }
@@ -51,6 +53,7 @@ main.use(global.settings.adminUrl, function(req, res, next){
   else if(req.method === 'DELETE'){
     req.on('end', function(){
       utils.deleteFile(req.headers['filename'], function(){
+        urlcache = {};
         res.end("Deleted file: '" + req.headers['filename'] + "'");
       });
     });
@@ -66,10 +69,19 @@ main.use('/static', connect.static(path.normalize(__dirname + '/../static'), {ma
  * Detects language or redirects to the default language.
  */
 main.use('/', function(req, res, next){
-  var parsed = url.parse( req.url );
+  // Caching in memory - the whole cache is invalidated on any change
+  if(req.url in urlcache) {
+    res.writeHead(200, urlcache[req.url].headers)
+    return res.end(urlcache[req.url].body);
+  }
+
+  req.origUrl = req.url;
+  var parsed  = url.parse( req.url );
   if(req.method === 'GET' && (/.+\/+$/).test( parsed.pathname )) {
     parsed.pathname = parsed.pathname.replace(/\/+$/,'');
-    res.writeHead(301, { 'Location': url.format( parsed ) });
+    res.writeHead(301, { 
+      'Location': url.format( parsed ) 
+    });
     return res.end();
   }
   // Get language or redirect to default language
@@ -77,7 +89,9 @@ main.use('/', function(req, res, next){
   if( !~global.settings.languages.indexOf(chunks[1]) ) {
     chunks.splice(1, 0, global.settings.languages[0]);
     parsed.pathname = chunks.join("/");
-    res.writeHead(301, { 'Location': url.format( parsed ) });
+    res.writeHead(301, { 
+      'Location': url.format( parsed ) 
+    });
     return res.end();
   }
   req.language = chunks.splice(1, 1)[0];
@@ -209,7 +223,15 @@ main.use('/', function(req, res, next){
     if(err) {
       return next(err.code === "ENOENT" ? 404 : 500);
     }
-    return res.end(html);
+    urlcache[req.origUrl] = {
+      headers: {
+        'Content-Type':   'text/html',
+        'Content-Length':  Buffer.byteLength(html)
+      },
+      body: html
+    };
+    res.writeHead(200, urlcache[req.origUrl].headers);
+    return res.end(urlcache[req.origUrl].body);
   });
 });
 
@@ -225,4 +247,5 @@ main.use('/', function(err, req, res, next){
     res.end(html || "500 Internal Server Error");
   });
 });
+
 module.exports = main;

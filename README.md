@@ -1,14 +1,3 @@
-Language:     en
-Date:         2012-01-16
-Title:        This Blog's README
-Description:  This Blog's readme.
-Menus:        Bookmarks
-Tags:         Blog
-
-This page is This Blog's README file. If you are interested in how this blog works, continue reading.
-
------
-
 ### Debugger
 
 - Start node:             $ node --debug-brk server.js
@@ -19,6 +8,6 @@ This page is This Blog's README file. If you are interested in how this blog wor
 
 - Add Pagination to lists
 - Optimize (Seems like IO is blocking somewhere or something is not cached)
-- Logging / Analytics
+- Log all uncommon errors
 - Package.json
 - Publish
