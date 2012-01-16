@@ -10,6 +10,11 @@ var utils   = require('./libs/utils');
 var server  = require('./libs/server');
 var client  = require('./libs/client');
 
+process.on('uncaughtException', function (err) {
+  console.log('Caught exception:');
+  console.log(err);
+});
+
 if(options.p || options.publish) {
   client.publish();
 }
