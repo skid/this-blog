@@ -10,13 +10,14 @@
   "maxhomepage": 10,
   "languages":   ["en", "mk"],
   "langinfo":    {"en": "English", "mk": "Macedonian"},
-  "sitemenus":   ["bookmarks"],
+  "sitemenus":   ["bookmarks", "readme"],
   "strings":     {
     "en": {
       "homepage":       "Homepage",
       "languages":      "Languages",
       "all_languages":  "All languages",
       "bookmarks":      "Bookmarks",
+      "readme":         "README",
       "projects":       "Projects",
       "tags":           "Tags",
       "title":          "Discobot",
@@ -32,6 +33,7 @@
       "languages":      "Јазици",
       "all_languages":  "Сите јазици",
       "bookmarks":      "Букмаркс",
+      "readme":         "README",
       "projects":       "Проекти",
       "tags":           "Тагови",
       "title":          "Discobot",

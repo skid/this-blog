@@ -1,4 +1,13 @@
-# What is this blog ?
+Language:     en
+Date:         2012-01-16
+Title:        This Blog's README
+Description:  This Blog's readme.
+Menus:        Bookmarks
+Tags:         Blog
+
+This page is This Blog's README file. If you are interested in how this blog works, continue reading.
+
+-----
 
 ### Debugger
 
@@ -8,8 +17,8 @@
 
 ### TODOs
 
-- Load and read settings.json
-- Optimize (Seems like IO is blocking somewhere)
+- Add Pagination to lists
+- Optimize (Seems like IO is blocking somewhere or something is not cached)
 - Logging / Analytics
 - Package.json
 - Publish
