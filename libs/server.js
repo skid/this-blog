@@ -62,7 +62,8 @@ main.use(global.settings.adminUrl, function(req, res, next){
 
 
 /* Serve static content and favicon */
-main.use('/favicon.ico', utils.favicon);
+main.use('/favicon.ico', utils.serveFile(path.normalize(__dirname + '/static/favicon.ico'), {'Cache-Control':  'public, max-age=' + (84600 * 365)}));
+main.use('/robots.txt', utils.serveFile(path.normalize(__dirname + '/static/robots.txt'), {'Cache-Control':  'public, max-age=' + (84600)}));
 main.use('/static', connect.static(path.normalize(__dirname + '/../static'), {maxAge: 86400000 * 365 }));
 
 /* Redirects to the same url without trailing slash.

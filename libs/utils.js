@@ -5,7 +5,6 @@ var marked    = require('marked');
 var connect   = require('connect');
 var templates = {};
 var cache     = global.cache;
-var icon;
 
 function formatDate(date, lang) {
   return global.settings.strings[lang].months[date.getMonth()] + " " + date.getDate() + ", " + date.getFullYear();
@@ -38,29 +37,20 @@ exports.extend = function(a, b) {
  * Custom favicon server, because the one from connect 
  * does not work with trailing slashes.
  */
-exports.favicon = function(req, res, next){
-  if(icon) {
-    res.writeHead(200, icon.headers);
-    return res.end(icon.body);
-  }
-  fs.readFile(path.normalize(__dirname + '/../static/favicon.ico'), function(err, buf){
-    if (err) {
-      return next(err);
-    }
-    icon = {
-      body: buf,
-      headers: {
-        'Content-Length': buf.length, 
-        'Content-Type':   'image/x-icon', 
-        'Cache-Control':  'public, max-age=' + (84600 * 365),
-        'ETag':           '"' + connect.utils.md5(buf) + '"'
+exports.serveFile = function(path, headers){
+  return function(req, res, next){
+    fs.readFile(path, function(err, buf){
+      if (err) {
+        return next(err);
       }
-    }
-    res.writeHead(200, icon.headers);
-    res.end(icon.body);
-  });
+      headers['Content-Length'] = buf.length;
+      headers['Content-Type'] = mime.lookup(path);
+      headers['Etag'] = connect.utils.md5(buf);
+      res.writeHead(200, headers);
+      res.end(bug);
+    });
+  }
 }
-
 
 /**
  * Deletes a file and removes it from all caches
