@@ -224,16 +224,20 @@ main.use('/', function(req, res, next){
     if(err) {
       return next(err.code === "ENOENT" ? 404 : 500);
     }
-    console.log("ASD")
-    urlcache[req.origUrl] = {
+    var cached = {
       headers: {
         'Content-Type':   'text/html; charset=UTF-8',
         'Content-Length':  Buffer.byteLength(html)
       },
       body: html
     };
-    res.writeHead(200, urlcache[req.origUrl].headers);
-    return res.end(urlcache[req.origUrl].body);
+    
+    if(req.method === 'GET' && req.origUrl) {
+      urlcache[req.origUrl] = cached
+    }
+
+    res.writeHead(200, cached.headers);
+    return res.end(cached.body);
   });
 });
 
