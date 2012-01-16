@@ -23,7 +23,6 @@ main.use(global.settings.adminUrl, function(req, res, next){
   if(req.headers.password !== global.settings.password) {
     return next(404);
   }
-  null.pointer;
   // Get the served files' checksums to decide what files need to be sent.
   if(req.method === 'GET'){
     var json = JSON.stringify(cache.checksums);
