@@ -1,0 +1,17 @@
+node_modules
+
+*.py[co]
+*.egg
+*.egg-info
+.installed.cfg
+pip-log.txt
+.coverage
+.tox
+*.mo
+.mr.developer.cfg
+*.pyc
+.DS_Store
+Icon?
+._*
+.Spotlight-V100
+.Trashes

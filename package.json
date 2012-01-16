@@ -1,0 +1,21 @@
+{ 
+  "name":         "Bloog",
+  "description":  "A simple nodejs blog for programmers that like Markdown",
+  "author":       "Dusko Jordanovski <jordanovskid@gmail.com>",
+  "version":      "0.1.0",
+  "keywords":     ["node", "blog", "simple", "markdown", "static"],
+  "devDependencies": {
+  },
+  "dependencies": {
+    "mime":     ">=1.2.4",
+    "connect":  ">=1.0.0",
+    "marked":   ">=1.0.0",
+    "optimist": ">=1.0.0"
+  },
+  "scripts":      {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">= 0.6.0"
+  }
+}
