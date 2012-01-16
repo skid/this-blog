@@ -8,7 +8,6 @@
 
 ### TODOs
 
-- Add 500 and 404 pages
 - Delete files and posts
 - Load and read settings.json
 - Logging / Analytics

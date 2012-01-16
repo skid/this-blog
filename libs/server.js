@@ -52,7 +52,9 @@ main.use(settings.adminUrl, function(req, res, next){
   // Delete file
   else if(req.method === 'DELETE'){
     req.on('end', function(){
-      res.end("This is a DELETE method.");
+      utils.deleteFile(req.headers['filename'], function(){
+        res.end("Deleted file: '" + req.headers['filename'] + "'");
+      });
     });
   }
 });
@@ -103,7 +105,8 @@ main.use('/', function(req, res, next){
                   return "<li><a href='/" + req.language +  settings.tagsUrl + "/" + tag + "'>" + (tag.charAt(0).toUpperCase() + tag.slice(1)) + "</a></li>";
                 }).join("") + 
               "</ul>",
-    strings:  settings.strings[req.language]
+    strings:  settings.strings[req.language],
+    settings: settings
   };
   next();
 });
@@ -213,11 +216,15 @@ main.use('/', function(req, res, next){
 });
 
 /* In the end show a 404 page */
-main.use('/', function(req, res, next, err){ 
-  req.context.content = err === 404 ? 404 : 500;
-  req.context.title   = err === 404 ? "Not Found" : "Internal Server Error";
-  utils.template(path.normalize(__dirname + "/../templates/error.html"), req.context, function(err, html){
-    return res.end(html);
+main.use('/', function(err, req, res, next){
+  req.context = {
+    strings: settings.strings[req.language],
+    content: err.status === 404 ? 404 : 500,
+    title:   err.status === 404 ? "Not Found" : "Internal Server Error"
+  }
+  utils.template(path.normalize(__dirname + "/../templates/error.html"), req.context, function(error, html){
+    res.writeHead(err.status);
+    res.end(html);
   });
 });
 module.exports = main;

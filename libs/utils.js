@@ -61,6 +61,38 @@ exports.favicon = function(req, res, next){
   });
 }
 
+
+/**
+ * Deletes a file and removes it from all caches
+ */
+exports.deleteFile = function(filename, callback){
+  fs.unlink(path.normalize(__dirname + '/../' + filename));
+
+  delete cache.checksums[filename];
+  delete templates[filename];
+  
+  // Remove posts from cache, menus and tags
+  if( filename.indexOf('posts/') === 0){
+    var chunks  = filename.split(".");
+    var name    = chunks[0].split("/");
+        name    = name.length > 1 ? name[name.length-1] : name[0];
+    var slug    = slugify(name);
+    var lang    = chunks.length === 3 ? chunks[1] : settings.languages[0];
+
+    delete cache.posts[slug][lang];
+
+    if(Object.keys(cache.posts[slug]).length === 0){
+      if(~cache.tags.indexOf(slug)){
+        cache.tags.splice(cache.tags.indexOf(slug), 1);
+      }
+      if(~cache.menus.indexOf(slug)){
+        cache.menus.splice(cache.menus.indexOf(slug), 1);
+      } 
+    }
+  }
+  callback && callback();
+}
+
 /**
  * Takes a stream and calculates the hash. It also saves the stream.
  * This is used for templates and static files. For posts see updatePost.
@@ -127,7 +159,7 @@ exports.updatePost = function(stream, filename, options, callback) {
     var name    = chunks[0].split("/");
         name    = name.length > 1 ? name[name.length-1] : name[0];
     var slug    = slugify(name);
-    var lang    = chunks.length === 3 ? chunks[1] : settings.languages[0];    
+    var lang    = chunks.length === 3 ? chunks[1] : settings.languages[0];
     var headers = {
       link:       "/" + lang + settings.postsUrl + "/" + slug,
       permalink:  settings.server + (settings.port !== 80 ? ":" + settings.port : "") + "/" + lang + settings.postsUrl + "/" + slug,
