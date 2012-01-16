@@ -6,8 +6,11 @@
 - Start node-inspector:   $ node-inspector &
 - Visit in Chrome:        http://127.0.0.1:8080/debug?port=5858
 
-### URL Sceme
+### TODOs
 
-- /           -> maps to _homepage.html
-- /page-slug  -> maps to any page in posts
-- /static     -> maps to the static directory
+- Add 500 and 404 pages
+- Delete files and posts
+- Load and read settings.json
+- Logging / Analytics
+- Package.json
+- Publish

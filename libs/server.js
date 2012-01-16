@@ -12,6 +12,7 @@ var connect   = require('connect');
 var settings  = global.settings; 
 var cache     = global.cache;
 var main      = connect();
+
 /* 
  * We use this URL to manage the posts with the client 
  * Markdown file's mimes will always be text/markdown
@@ -21,12 +22,15 @@ main.use(settings.adminUrl, function(req, res, next){
   if(req.headers.password !== settings.password) {
     return next(404);
   }
+  
+  // Get the served files' checksums
   if(req.method === 'GET'){
     var json = JSON.stringify(cache.checksums);
-    res.setHeader('content-type', 'text/json');
-    res.setHeader('content-length', Buffer.byteLength(json));
+    res.writeHead(200, { 'content-type': 'text/json', 'content-length', Buffer.byteLength(json) });
     res.end(json);
   }
+  
+  // Update or Create file
   else if(req.method === 'PUT'){
     if(!req.headers['filename'] || !req.headers['content-type']) {
       return res.end("No filename or content-type supplied for PUT request");
@@ -38,9 +42,11 @@ main.use(settings.adminUrl, function(req, res, next){
     }
     update = req.headers['content-type'] === 'text/markdown' ? utils.updatePost : utils.updateFile;
     update(req, req.headers['filename'], options, function(){
-      res.end("File '" + req.headers['filename'] + "' received.");
+      res.end("Received file: '" + req.headers['filename']);
     });
   }
+
+  // Delete file
   else if(req.method === 'DELETE'){
     req.on('end', function(){
       res.end("This is a DELETE method.");
@@ -49,29 +55,7 @@ main.use(settings.adminUrl, function(req, res, next){
 });
 
 /* Serve static content before all */
-var icon;
-main.use('/favicon.ico', function favicon(req, res, next){
-  if(icon) {
-    res.writeHead(200, icon.headers);
-    return res.end(icon.body);
-  }
-  fs.readFile(path.normalize(__dirname + '/../static/favicon.ico'), function(err, buf){
-    if (err) {
-      return next(err);
-    }
-    icon = {
-      body: buf,
-      headers: {
-        'Content-Type': 'image/x-icon', 
-        'Content-Length': buf.length, 
-        'ETag': '"' + connect.utils.md5(buf) + '"', 
-        'Cache-Control': 'public, max-age=' + (84600 * 365) 
-      }
-    }
-    res.writeHead(200, icon.headers);
-    res.end(icon.body);
-  });
-});
+main.use('/favicon.ico', utils.favicon);
 main.use('/static', connect.static(path.normalize(__dirname + '/../static'), {maxAge: 86400000 * 365 }));
 
 /* Always redirect to the same url without trailing slash */
@@ -121,7 +105,7 @@ main.use('/', function(req, res, next){
 /* Post page */
 main.use(settings.postsUrl, function(req, res, next){  
   var post, chunks = req.url.split("/"), slug = chunks[1];
-  
+
   /* We expect something like "/post-slug" */
   if(chunks.length != 2){
     return next(404);
@@ -221,8 +205,5 @@ main.use('/', function(req, res, next){
 });
 
 /* In the end show a 404 page */
-main.use('/', function(req, res, next){ 
-  next(404); 
-});
-
+main.use('/', function(req, res, next){ next(404); });
 module.exports = main;

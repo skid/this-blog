@@ -22,6 +22,7 @@ var marked    = require('marked');
 var templates = {};
 var settings  = global.settings;
 var cache     = global.cache;
+var icon;
 
 function formatDate(date, lang) {
   return settings.strings[lang].months[date.getMonth()] + " " + date.getDate() + ", " + date.getFullYear();
@@ -45,6 +46,33 @@ exports.extend = function(a, b) {
     }
   }
   return newobj;
+}
+
+/**
+ * Custom favicon server, because the one from connect 
+ * does not work with trailing slashes.
+ */
+exports.favicon = function(req, res, next){
+  if(icon) {
+    res.writeHead(200, icon.headers);
+    return res.end(icon.body);
+  }
+  fs.readFile(path.normalize(__dirname + '/../static/favicon.ico'), function(err, buf){
+    if (err) {
+      return next(err);
+    }
+    icon = {
+      body: buf,
+      headers: {
+        'Content-Type': 'image/x-icon', 
+        'Content-Length': buf.length, 
+        'ETag': '"' + connect.utils.md5(buf) + '"', 
+        'Cache-Control': 'public, max-age=' + (84600 * 365) 
+      }
+    }
+    res.writeHead(200, icon.headers);
+    res.end(icon.body);
+  });
 }
 
 /**
