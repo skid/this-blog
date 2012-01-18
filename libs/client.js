@@ -30,6 +30,9 @@ function lookupMime(filename){
  * Uploads or deletes those files from remote instance.
  */
 function upload(remoteChecksums) {
+  console.log(remoteChecksums)
+  console.log(cache.checksums)
+  
   var i, send = {};
   for(i in cache.checksums) {
     if(!(i in remoteChecksums) || remoteChecksums[i] !== cache.checksums[i]) {
