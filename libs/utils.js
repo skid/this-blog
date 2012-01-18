@@ -76,6 +76,9 @@ exports.deleteFile = function(filepath, callback){
   var filename = filepath.substr(filepath.lastIndexOf("/") + 1);
   fs.unlink(filepath);
 
+  console.log(cache.checksums);
+  console.log(filename);
+  
   delete cache.checksums[filename];
   delete templates[filename];
   
