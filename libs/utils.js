@@ -153,7 +153,7 @@ exports.updateFile = function(stream, filepath, options, callback) {
         delete templates[filename];
       }
       fs.writeFile(filepath, data, 'utf-8', callback);
-      if(filename 'settings.json') {
+      if(filename === 'settings.json') {
         global.settings = JSON.parse(data);
       }
     }
