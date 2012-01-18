@@ -73,8 +73,6 @@ exports.serveFile = function(filepath, headers){
  * Deletes a file and removes it from all caches
  */
 exports.deleteFile = function(filepath, callback){
-  fs.unlink(filepath);
-
   delete cache.checksums[filepath.substr(settings.root.length + 1)];
   delete templates[filepath.substr(settings.root.length + 1)];
   
@@ -85,11 +83,11 @@ exports.deleteFile = function(filepath, callback){
     var name      = chunks[0];
     var slug      = slugify(name);
     var lang      = chunks.length === 3 ? chunks[1] : global.settings.languages[0];
+    var i;
 
     delete cache.posts[slug][lang];
 
     if(Object.keys(cache.posts[slug]).length === 0){
-      var i;
       for(i in cache.tags){
         if(~cache.tags[i].indexOf(slug)){
           cache.tags[i].splice(cache.tags[i].indexOf(slug), 1);
@@ -98,6 +96,7 @@ exports.deleteFile = function(filepath, callback){
           delete cache.tags[i];
         }
       }
+
       for(i in cache.menus){
         if(~cache.menus[i].indexOf(slug)){
           cache.menus[i].splice(cache.menus[i].indexOf(slug), 1);
@@ -108,6 +107,8 @@ exports.deleteFile = function(filepath, callback){
       }
     }
   }
+
+  fs.unlink(filepath);
   callback && callback();
 }
 

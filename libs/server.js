@@ -42,7 +42,6 @@ main.use(settings.adminUrl, function(req, res, next){
       'text': req.headers['content-type'].split("/")[0] === 'text',
       'size': parseInt(req.headers['content-length'] || 0, 10)
     }
-
     var update = req.headers['content-type'] === 'text/markdown' ? utils.updatePost : utils.updateFile;
     update(req, path.join(settings.root, req.headers['filename']), options, function(){
       urlcache = {};
