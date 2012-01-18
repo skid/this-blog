@@ -66,7 +66,7 @@ function upload(localChecksums, remoteChecksums) {
 
   // Send
   Object.keys(send).forEach(function(filename){
-    var filepath = path.normalize(__dirname + '/../' + filename);    
+    var filepath = path.join(settings.root, filename);    
     
     fs.stat(filepath, function(e, stat) {
       var options, req, data = "";
@@ -111,20 +111,15 @@ exports.publish = function(){
   var req, data = "";
   
   console.log("Calculating settings checksum ...");
-  checksums['settings.json'] = crypto.createHash('sha1').update(fs.readFileSync(path.normalize(__dirname + '/../settings.json'))).digest('hex');
+  checksums['settings.json'] = crypto.createHash('sha1').update(fs.readFileSync(path.join(settings.root, 'settings.json'))).digest('hex');
   
   console.log("Calculating local checksums ...");
-  ['templates', 'static', 'posts'].forEach(function(dir){
-    fs.readdirSync(path.normalize(__dirname + '/../' + dir))
-      .filter(function(filename){ 
-        return filename[0] !== '.'; 
-      })
-      .forEach(function(filename){
-        filename = dir + '/' + filename;        
-        checksums[filename] = crypto.createHash('sha1').update(fs.readFileSync(path.normalize(__dirname + '/../' + filename))).digest('hex');
-      });
+  settings.contentDirs.forEach(function(dir){
+    utils.crawl(path.join(settings.root, dir), function(filepath){
+      checksums[filepath.substr(settings.root + 1)] = crypto.createHash('sha1').update(fs.readFileSync(filepath)).digest('hex');
+    });
   });
-  
+
   console.log("Fetching remote checksums ...");
   req = http.request(options, function(res){
     res.on('data', function (chunk) { 

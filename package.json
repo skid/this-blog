@@ -2,18 +2,23 @@
   "name":         "Bloog",
   "description":  "A simple nodejs blog for programmers that like Markdown",
   "author":       "Dusko Jordanovski <jordanovskid@gmail.com>",
-  "version":      "0.1.0",
-  "keywords":     ["node", "blog", "simple", "markdown", "static"],
-  "devDependencies": {
+  "version":      "0.2.0",
+  "license":      "MIT", 
+  "keywords":     ["blog", "simple", "markdown", "static"],
+  "repository": {
+    "type": "git", 
+    "url":  "http://github.com/skid/thisblog" 
   },
   "dependencies": {
     "mime":     ">=1.2.4",
-    "connect":  ">=1.0.0",
-    "marked":   ">=1.0.0",
-    "optimist": ">=1.0.0"
+    "connect":  ">=2.0.0",
+    "marked":   ">=0.1.2",
+    "optimist": ">=0.3.0",
+    "qs":       ">=0.4.0",
+    "winston":  ">=0.5.9"
   },
   "scripts":      {
-    "start": "node server.js"
+    "start": "node blog.js -s"
   },
   "engines": {
     "node": ">= 0.6.0"

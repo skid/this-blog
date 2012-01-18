@@ -15,6 +15,23 @@ function slugify(name) {
 }
 
 /**
+ * Recursively reads a directory tree and applies a function to all contained files
+ */
+var crawl = exports.crawl = function(dir, action){
+  fs.readdirSync(dir).forEach(function(filename){
+    var filepath = path.join(dir, filename);
+      
+    if(filename[0] === '.') {
+      return;
+    }
+    if(fs.statSync(filepath).isDirectory()){
+      return crawl(filepath, action);
+    }
+    action(filepath);
+  });
+}
+
+/**
  * Creates a new object and merges a and b into it.
  */
 exports.extend = function(a, b) {
@@ -56,18 +73,19 @@ exports.serveFile = function(path, headers){
  * Deletes a file and removes it from all caches
  */
 exports.deleteFile = function(filename, callback){
-  fs.unlink(path.normalize(__dirname + '/../' + filename));
+  var filepath = path.join(settings.root, filename);
+  fs.unlink(filepath);
 
-  delete cache.checksums[filename];
-  delete templates[filename];
+  delete cache.checksums[filepath.substr(settings.root.length + 1)];
+  delete templates[filepath];
   
   // Remove posts from cache, menus and tags
-  if( filename.indexOf('posts/') === 0){
-    var chunks  = filename.split(".");
-    var name    = chunks[0].split("/");
-        name    = name.length > 1 ? name[name.length-1] : name[0];
-    var slug    = slugify(name);
-    var lang    = chunks.length === 3 ? chunks[1] : global.settings.languages[0];
+  if(filepath.substr(-2).toLowerCase() === 'md'){
+    var filename  = filepath.substr(filepath.lastIndexOf("/") + 1);
+    var chunks    = filename.split(".");
+    var name      = chunks[0];
+    var slug      = slugify(name);
+    var lang      = chunks.length === 3 ? chunks[1] : global.settings.languages[0];
 
     delete cache.posts[slug][lang];
 
@@ -98,7 +116,7 @@ exports.deleteFile = function(filename, callback){
  * Takes a stream and calculates the hash. It also saves the stream.
  * This is used for templates and static files. For posts see updatePost.
  */
-exports.updateFile = function(stream, filename, options, callback) {
+exports.updateFile = function(stream, filepath, options, callback) {
   options = options || {};
   
   var data, tmp, bufcount = 0, hash = crypto.createHash('sha1');
@@ -126,17 +144,17 @@ exports.updateFile = function(stream, filename, options, callback) {
     }
     hash.update(part);
   });
+
   stream.on('end', function(){
-    cache.checksums[filename] = hash.digest('hex');
+    cache.checksums[filepath.substr(settings.root.length + 1)] = hash.digest('hex');
     if(options.save) {
-      var file = path.normalize(__dirname + '/../' + filename);
       // Invalidate cache for templates
-      if(file in templates){
-        delete templates[file];
+      if(filepath in templates){
+        delete templates[filepath];
       }
       fs.writeFile(file, data, 'utf-8', callback);
       // Update settings
-      if(filename === 'settings.json') {
+      if(filepath === path.join(settings.root, 'settings.json')) {
         global.settings = JSON.parse(data);
       }
     }
@@ -148,7 +166,7 @@ exports.updateFile = function(stream, filename, options, callback) {
 /**
  * Does the magic. Takes a stram and prepares a post from it.
  */
-exports.updatePost = function(stream, filename, options, callback) {
+exports.updatePost = function(stream, filepath, options, callback) {
   options = options || {};
   
   var data = "", hash = crypto.createHash('sha1');
@@ -159,12 +177,12 @@ exports.updatePost = function(stream, filename, options, callback) {
 
   stream.on('end', function() {
     // Get infor from filename
-    var chunks  = filename.split(".");
-    var name    = chunks[0].split("/");
-        name    = name.length > 1 ? name[name.length-1] : name[0];
-    var slug    = slugify(name);
-    var lang    = chunks.length === 3 ? chunks[1] : global.settings.languages[0];
-    var headers = {
+    var filename  = filepath.substr(filepath.lastIndexOf("/") + 1);
+    var chunks    = filename.split(".");
+    var name      = chunks[0];
+    var slug      = slugify(name);
+    var lang      = chunks.length === 3 ? chunks[1] : global.settings.languages[0];
+    var headers   = {
       link:       "/" + lang + global.settings.postsUrl + "/" + slug,
       permalink:  global.settings.server + (global.settings.port !== 80 ? ":" + global.settings.port : "") + "/" + lang + global.settings.postsUrl + "/" + slug,
       title:      name
@@ -199,7 +217,7 @@ exports.updatePost = function(stream, filename, options, callback) {
     });
     
     // Parse and compile markdown content
-    chunks  = data.substr(data.indexOf("\n\n") + 2).split("\n\n-----\n\n");
+    chunks = data.substr(data.indexOf("\n\n") + 2).split("\n\n-----\n\n");
     post.content = marked(chunks.join("\n\n"));
     post.excerpt = chunks.length > 1 ? marked(chunks[0]) : post.content;
     
@@ -274,9 +292,9 @@ exports.updatePost = function(stream, filename, options, callback) {
     });
 
     // Update the stored checksums
-    cache.checksums[filename] = hash.digest('hex');
+    cache.checksums[filepath.substr(settings.root.length + 1)] = hash.digest('hex');
     if(options.save) {
-      fs.writeFile(path.normalize(__dirname + '/../' + filename), data, 'utf-8', callback);
+      fs.writeFile(filepath, data, 'utf-8', callback);
     }
     else if(callback) {
       callback();

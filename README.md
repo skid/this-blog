@@ -6,7 +6,8 @@
 
 ### TODOs
 
-- Add Pagination to lists
-- Log all uncommon errors
-- Package.json
+- Blog publishing shoud recursively read static and template dir
+- Parametrize the posts, static and template dirs
+
 - Publish
+- Readme

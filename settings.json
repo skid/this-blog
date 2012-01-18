@@ -2,15 +2,18 @@
   "debug":       true,
   "port":        3000,
   "server":      "127.0.0.1",
+  "password":    "AEUOBA$@*Yfaf4oiuh2Aa$DhQI$Dha48d40dA$Id881048dn1F$18hg4f1",
+  "gaCode":      "GA-ABCDEFG",
   "postsUrl":    "/posts",
   "tagsUrl":     "/tags",
   "adminUrl":    "/admin",
-  "gaCode":      "GA-ABCDEFG",
-  "password":    "AEUOBA$@*Yfaf4oiuh2Aa$DhQI$Dha48d40dA$Id881048dn1F$18hg4f1",
-  "maxhomepage": 10,
+  "errorLog":    "error.log",
+  "maxExcerpts": 2,
+  "pagination":  9,
+  "contentDirs": ["posts", "templates", "static"],
   "languages":   ["en", "mk"],
-  "langinfo":    {"en": "English", "mk": "Macedonian"},
-  "sitemenus":   ["bookmarks", "readme"],
+  "langinfo":    {"en": "English", "mk": "Македонски"},
+  "sitemenus":   ["bookmarks"],
   "strings":     {
     "en": {
       "homepage":       "Homepage",
@@ -26,6 +29,10 @@
       "author":         "Dusko Jordanovski",
       "description":    "",
       "empty_list":     "Nothing here, try another language &rarr;",
+      "older":          "Older",
+      "newer":          "Newer",
+      "oldest":         "Oldest",
+      "newest":         "Newest",
       "months":         ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
     },
     "mk": {
@@ -42,6 +49,10 @@
       "author":         "Душко Јордановски",
       "description":    "",
       "empty_list":     "Нема ништо тука, пробај со друг јазик &rarr;",
+      "older":          "Постари",
+      "newer":          "Понови",
+      "oldest":         "Најстари",
+      "newest":         "Најнови",
       "months":         ["Јануари", "Февруари", "Март", "Април", "Мај", "Јуни", "Јули", "Август", "Септември", "Октомври", "Ноември", "Декември"]
     }
   }

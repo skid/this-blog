@@ -1,51 +1,44 @@
 var path    = require('path');
 var fs      = require('fs');
 var options = require('optimist').argv;
+var winston = require('winston');
+
+global.settings = JSON.parse(fs.readFileSync('settings.json', 'utf-8'));
+settings.root   = __dirname.replace(/\/+$/, "");
 
 global.cache    = { posts: {}, tags: {}, menus: {}, order: [], checksums: {} };
-global.settings = JSON.parse(fs.readFileSync('settings.json', 'utf-8'));
+global.logger   = new (winston.Logger)({
+  exitOnError: false,
+  transports:  [
+    new (winston.transports.File)({
+      handleExceptions: false,
+      filename: settings.errorLog
+    })
+  ]
+})
 
 // These have to be included after we parse the settings file
 var utils   = require('./libs/utils');
 var server  = require('./libs/server');
 var client  = require('./libs/client');
 
-process.on('uncaughtException', function (err) {
-  console.log('Caught exception:');
-  console.log(err);
-});
-
 if(options.p || options.publish) {
   client.publish();
 }
 else if(options.s || options.serve) {
-  var checksums, files; 
-  
-  console.log("Updating posts ...");
-  fs.readdirSync(path.join(__dirname, 'posts'))
-    .filter(function(f){ 
-      return f.substr(-2).toLowerCase() === 'md'; 
-    })
-    .forEach(function(filename){ 
-      utils.updatePost(fs.ReadStream(path.join(__dirname, 'posts', filename)), 'posts/' + filename); 
+  var checksums, files;
+
+  console.log("Updating static files and templates ...");
+  settings.contentDirs.forEach(function(dir){
+    utils.crawl(path.join(settings.root, dir), function(filepath){
+      utils[filepath.substr(-2).toLowerCase() === 'md' ? 'updatePost' : 'updateFile'](fs.ReadStream(filepath), filepath);
     });
-  
-  console.log("Updating static files and templates ...");  
-  ['templates', 'static'].forEach(function(dir){
-    fs.readdirSync(path.join(__dirname, dir))
-      .filter(function(filename){ 
-        return filename[0] !== '.'; 
-      })
-      .forEach(function(filename){ 
-        utils.updateFile(fs.ReadStream(path.join(__dirname, dir, filename)), dir + '/' + filename); 
-      });
   });
 
   // Settings file checksum
-  utils.updateFile(fs.ReadStream(path.join(__dirname, 'settings.json')), 'settings.json'); 
-  
-  require('http').createServer(server).listen(global.settings.port);
-  console.log("Serving this blog on " + global.settings.server + ":" + global.settings.port);
+  utils.updateFile(fs.ReadStream(path.join(settings.root, 'settings.json')), path.join(settings.root, 'settings.json'));
+  require('http').createServer(server).listen(settings.port);
+  console.log("Serving this blog on " + settings.server + ":" + settings.port);
 }
 else {
   console.log("");
