@@ -54,7 +54,7 @@ exports.extend = function(a, b) {
 /**
  * Serves static files on custom URLs like /favicon.ico and /robots.txt.
  */
-exports.serveFile = function(path, headers){
+exports.serveFile = function(filepath, headers){
   return function(req, res, next){
     fs.readFile(path, function(err, buf){
       if (err) {
@@ -72,16 +72,15 @@ exports.serveFile = function(path, headers){
 /**
  * Deletes a file and removes it from all caches
  */
-exports.deleteFile = function(filename, callback){
-  var filepath = path.join(settings.root, filename);
+exports.deleteFile = function(filepath, callback){
+  var filename = filepath.substr(filepath.lastIndexOf("/") + 1);
   fs.unlink(filepath);
 
-  delete cache.checksums[filepath.substr(settings.root.length + 1)];
-  delete templates[filepath];
+  delete cache.checksums[filename];
+  delete templates[filename];
   
   // Remove posts from cache, menus and tags
-  if(filepath.substr(-2).toLowerCase() === 'md'){
-    var filename  = filepath.substr(filepath.lastIndexOf("/") + 1);
+  if(filename.substr(-2).toLowerCase() === 'md'){
     var chunks    = filename.split(".");
     var name      = chunks[0];
     var slug      = slugify(name);
@@ -146,15 +145,15 @@ exports.updateFile = function(stream, filepath, options, callback) {
   });
 
   stream.on('end', function(){
-    cache.checksums[filepath.substr(settings.root.length + 1)] = hash.digest('hex');
+    var filename = filepath.substr(settings.root.length + 1);
+    cache.checksums[filename] = hash.digest('hex');
     if(options.save) {
       // Invalidate cache for templates
       if(filepath in templates){
-        delete templates[filepath];
+        delete templates[filename];
       }
       fs.writeFile(filepath, data, 'utf-8', callback);
-      // Update settings
-      if(filepath === path.join(settings.root, 'settings.json')) {
+      if(filename 'settings.json') {
         global.settings = JSON.parse(data);
       }
     }
@@ -292,7 +291,7 @@ exports.updatePost = function(stream, filepath, options, callback) {
     });
 
     // Update the stored checksums
-    cache.checksums[filepath.substr(settings.root.length + 1)] = hash.digest('hex');
+    cache.checksums[filename] = hash.digest('hex');
     if(options.save) {
       fs.writeFile(filepath, data, 'utf-8', callback);
     }
