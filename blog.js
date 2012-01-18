@@ -22,21 +22,20 @@ var utils   = require('./libs/utils');
 var server  = require('./libs/server');
 var client  = require('./libs/client');
 
+// Settings file checksum
+utils.updateFile(fs.ReadStream(path.join(settings.root, 'settings.json')), path.join(settings.root, 'settings.json'));
+  
+console.log("Updating static files and templates ...");
+settings.contentDirs.forEach(function(dir){
+  utils.crawl(path.join(settings.root, dir), function(filepath){
+    utils[filepath.substr(-2).toLowerCase() === 'md' ? 'updatePost' : 'updateFile'](fs.ReadStream(filepath), filepath);
+  });
+});
+
 if(options.p || options.publish) {
   client.publish();
 }
 else if(options.s || options.serve) {
-  var checksums, files;
-
-  console.log("Updating static files and templates ...");
-  settings.contentDirs.forEach(function(dir){
-    utils.crawl(path.join(settings.root, dir), function(filepath){
-      utils[filepath.substr(-2).toLowerCase() === 'md' ? 'updatePost' : 'updateFile'](fs.ReadStream(filepath), filepath);
-    });
-  });
-
-  // Settings file checksum
-  utils.updateFile(fs.ReadStream(path.join(settings.root, 'settings.json')), path.join(settings.root, 'settings.json'));
   require('http').createServer(server).listen(settings.port);
   console.log("Serving this blog on " + settings.server + ":" + settings.port);
 }

@@ -29,11 +29,11 @@ function lookupMime(filename){
  * Calculates which files need to be uploaded or removed from the remote instance.
  * Uploads or deletes those files from remote instance.
  */
-function upload(localChecksums, remoteChecksums) {
+function upload(remoteChecksums) {
   var i, send = {};
-  for(i in localChecksums) {
-    if(!(i in remoteChecksums) || remoteChecksums[i] !== localChecksums[i]) {
-      send[i] = localChecksums[i];
+  for(i in cache.checksums) {
+    if(!(i in remoteChecksums) || remoteChecksums[i] !== cache.checksums[i]) {
+      send[i] = cache.checksums[i];
       delete remoteChecksums[i];
     }
     else if(i in remoteChecksums) {
@@ -70,7 +70,7 @@ function upload(localChecksums, remoteChecksums) {
     
     fs.stat(filepath, function(e, stat) {
       var options, req, data = "";
-      
+
       if (e) {
         console.log("Error with local file: " + filename);
         console.log("Error Code: " + e.code || e.errno);
@@ -109,16 +109,6 @@ exports.publish = function(){
   var options   = utils.extend(reqOpts, { headers: { password: global.settings.password, filename: "" } });
   var checksums = {};
   var req, data = "";
-  
-  console.log("Calculating settings checksum ...");
-  checksums['settings.json'] = crypto.createHash('sha1').update(fs.readFileSync(path.join(settings.root, 'settings.json'))).digest('hex');
-  
-  console.log("Calculating local checksums ...");
-  settings.contentDirs.forEach(function(dir){
-    utils.crawl(path.join(settings.root, dir), function(filepath){
-      checksums[filepath.substr(settings.root + 1)] = crypto.createHash('sha1').update(fs.readFileSync(filepath)).digest('hex');
-    });
-  });
 
   console.log("Fetching remote checksums ...");
   req = http.request(options, function(res){
@@ -127,7 +117,7 @@ exports.publish = function(){
     });
     res.on('end', function(){ 
       if(res.statusCode === 200) {
-        return upload(checksums, JSON.parse(data));
+        return upload(JSON.parse(data));
       }
       if(res.statusCode === 404) {
         return  console.log("Not found. Did you change your password ?");
