@@ -73,17 +73,14 @@ exports.serveFile = function(filepath, headers){
  * Deletes a file and removes it from all caches
  */
 exports.deleteFile = function(filepath, callback){
-  var filename = filepath.substr(filepath.lastIndexOf("/") + 1);
   fs.unlink(filepath);
 
-  console.log(cache.checksums);
-  console.log(filename);
-  
-  delete cache.checksums[filename];
-  delete templates[filename];
+  delete cache.checksums[filepath.substr(settings.root.length + 1)];
+  delete templates[filepath.substr(settings.root.length + 1)];
   
   // Remove posts from cache, menus and tags
   if(filename.substr(-2).toLowerCase() === 'md'){
+    var filename  = filepath.substr(filepath.lastIndexOf("/") + 1);
     var chunks    = filename.split(".");
     var name      = chunks[0];
     var slug      = slugify(name);
@@ -294,7 +291,7 @@ exports.updatePost = function(stream, filepath, options, callback) {
     });
 
     // Update the stored checksums
-    cache.checksums[filename] = hash.digest('hex');
+    cache.checksums[filepath.substr(settings.root.length + 1)] = hash.digest('hex');
     if(options.save) {
       fs.writeFile(filepath, data, 'utf-8', callback);
     }
