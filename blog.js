@@ -25,7 +25,7 @@ var client  = require('./libs/client');
 // Settings file checksum
 utils.updateFile(fs.ReadStream(path.join(settings.root, 'settings.json')), path.join(settings.root, 'settings.json'));
   
-console.log("Updating static files and templates ...");
+console.log("Updating local files cache ...");
 settings.contentDirs.forEach(function(dir){
   utils.crawl(path.join(settings.root, dir), function(filepath){
     utils[filepath.substr(-2).toLowerCase() === 'md' ? 'updatePost' : 'updateFile'](fs.ReadStream(filepath), filepath);
