@@ -88,6 +88,8 @@ exports.deleteFile = function(filepath, callback){
     delete cache.posts[slug][lang];
 
     if(Object.keys(cache.posts[slug]).length === 0){
+      delete cache.posts[slug];
+
       for(i in cache.tags){
         if(~cache.tags[i].indexOf(slug)){
           cache.tags[i].splice(cache.tags[i].indexOf(slug), 1);
@@ -215,12 +217,12 @@ exports.updatePost = function(stream, filepath, options, callback) {
       }
       headers[k] = v;
     });
-    
+
     // Parse and compile markdown content
     chunks = data.substr(data.indexOf("\n\n") + 2).split("\n\n-----\n\n");
     post.content = marked(chunks.join("\n\n"));
     post.excerpt = chunks.length > 1 ? marked(chunks[0]) : post.content;
-    
+
     // Put compled post in cache
     if(slug in cache.posts) {
       cache.posts[slug][lang] = post;
