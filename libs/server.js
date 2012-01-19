@@ -51,11 +51,9 @@ main.use(settings.adminUrl, function(req, res, next){
 
   // Delete file
   else if(req.method === 'DELETE'){
-    req.on('end', function(){
-      utils.deleteFile(path.join(settings.root, req.headers['filename']), function(){
-        urlcache = {};
-        res.end("Deleted file: '" + req.headers['filename'] + "'");
-      });
+    utils.deleteFile(path.join(settings.root, req.headers['filename']), function(){
+      urlcache = {};
+      res.end("Deleted file: '" + req.headers['filename'] + "'");
     });
   }
 });
