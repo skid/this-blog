@@ -197,7 +197,7 @@ exports.updatePost = function(stream, filepath, options, callback) {
     
     var headers   = {
       link:       "/" + lang + settings.postsUrl + "/" + slug,
-      permalink:  settings.server + (settings.port !== 80 ? ":" + settings.port : "") + "/" + lang + settings.postsUrl + "/" + slug,
+      permalink:  settings.server + (settings.remotePort !== 80 ? ":" + settings.remotePort : "") + "/" + lang + settings.postsUrl + "/" + slug,
       title:      name
     };
     var post    = {

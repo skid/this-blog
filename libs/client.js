@@ -8,8 +8,8 @@ var utils     = require('./utils');
 var reqOpts   = {
   connection: "Keep-Alive",
   method:     "GET",
-  host:       global.settings.server,
-  port:       global.settings.port,
+  host:       global.settings.remoteUrl,
+  port:       global.settings.remotePort,
   path:       global.settings.adminUrl,
 }
 

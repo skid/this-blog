@@ -3,6 +3,7 @@
  * 
  * Author: Dusko Jordanovski <jordanovskid@gmail.com>
  */
+
 var path    = require('path');
 var fs      = require('fs');
 var options = require('optimist').argv;
