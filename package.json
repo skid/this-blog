@@ -4,10 +4,10 @@
   "author":       "Dusko Jordanovski <jordanovskid@gmail.com>",
   "version":      "0.2.0",
   "license":      "MIT", 
-  "keywords":     ["blog", "simple", "markdown", "static"],
+  "keywords":     ["blog", "markdown", "static"],
   "repository": {
     "type": "git", 
-    "url":  "http://github.com/skid/thisblog" 
+    "url":  "https://github.com/skid/this-blog" 
   },
   "dependencies": {
     "mime":     ">=1.2.4",
