@@ -6,28 +6,18 @@ var marked    = require('marked');
 var connect   = require('connect');
 var templates = {};
 
+/**
+ * Formats a date object
+ */
 function formatDate(date, lang) {
   return global.settings.strings[lang].months[date.getMonth()] + " " + date.getDate() + ", " + date.getFullYear();
 }
-function slugify(name) {
-  return name.toLowerCase().replace(/\s+/g, "-");
-}
 
 /**
- * Recursively reads a directory tree and applies a function to all contained files
+ * Creates a slug from a post name
  */
-var crawl = exports.crawl = function(dir, action){
-  fs.readdirSync(dir).forEach(function(filename){
-    var filepath = path.join(dir, filename);
-      
-    if(filename[0] === '.') {
-      return;
-    }
-    if(fs.statSync(filepath).isDirectory()){
-      return crawl(filepath, action);
-    }
-    action(filepath);
-  });
+function slugify(name) {
+  return name.toLowerCase().replace(/\s+/g, "-");
 }
 
 /**
@@ -50,17 +40,35 @@ exports.extend = function(a, b) {
   return newobj;
 }
 
+
+/**
+ * Recursively reads a directory tree and applies a function to all contained files.
+ * This method is synchronous and intended for use only on server startup and when publishing.
+ */
+var crawl = exports.crawl = function(dir, action){
+  fs.readdirSync(dir).forEach(function(filename){
+    var filepath = path.join(dir, filename);
+    if(filename[0] === '.') {
+      return;
+    }
+    if(fs.statSync(filepath).isDirectory()){
+      return crawl(filepath, action);
+    }
+    action(filepath);
+  });
+}
+
 /**
  * Serves static files on custom URLs like /favicon.ico and /robots.txt.
  */
 exports.serveFile = function(filepath, headers){
   return function(req, res, next){
-    fs.readFile(path, function(err, buf){
+    fs.readFile(filepath, function(err, buf){
       if (err) {
         return next(err.code === 'ENOENT' ? 404 : err);
       }
       headers['Content-Length'] = buf.length;
-      headers['Content-Type'] = mime.lookup(path);
+      headers['Content-Type'] = mime.lookup(filepath);
       headers['Etag'] = connect.utils.md5(buf);
       res.writeHead(200, headers);
       res.end(buf);
@@ -83,7 +91,7 @@ exports.deleteFile = function(filepath, callback){
     var slug      = slugify(name);
     var lang      = chunks.length === 3 ? chunks[1] : settings.languages[0];
     var i;
-    console.log(filename, name, slug, lang)
+
     delete cache.posts[slug][lang];
 
     if(Object.keys(cache.posts[slug]).length === 0){
@@ -114,7 +122,7 @@ exports.deleteFile = function(filepath, callback){
 }
 
 /**
- * Takes a stream and calculates the hash. It also saves the stream.
+ * Takes a stream and calculates the hash. It optionally saves the stream to a file.
  * This is used for templates and static files. For posts see updatePost.
  */
 exports.updateFile = function(stream, filepath, options, callback) {
@@ -151,15 +159,13 @@ exports.updateFile = function(stream, filepath, options, callback) {
     cache.checksums[filename] = hash.digest('hex');
     if(options.save) {
       // Invalidate cache for templates
-      if(filepath in templates){
-        delete templates[filename];
-      }
+      delete templates[filename];
+
       fs.writeFile(filepath, data, 'utf-8', callback);
       if(filename === 'settings.json') {
         global.settings = JSON.parse(data);
       }
     }
-
     callback && callback();
   });
 }
@@ -183,6 +189,12 @@ exports.updatePost = function(stream, filepath, options, callback) {
     var name      = chunks[0];
     var slug      = slugify(name);
     var lang      = chunks.length === 3 ? chunks[1] : settings.languages[0];
+    
+    if(!~settings.languages.indexOf(lang)) {
+      logger.log("error", "Invalid filename for post '" + filename + "'", {});
+      return;
+    }
+    
     var headers   = {
       link:       "/" + lang + settings.postsUrl + "/" + slug,
       permalink:  settings.server + (settings.port !== 80 ? ":" + settings.port : "") + "/" + lang + settings.postsUrl + "/" + slug,

@@ -43,21 +43,32 @@ main.use(settings.adminUrl, function(req, res, next){
       'size': parseInt(req.headers['content-length'] || 0, 10)
     }
     var update = req.headers['content-type'] === 'text/markdown' ? utils.updatePost : utils.updateFile;
-    update(req, path.join(settings.root, req.headers['filename']), options, function(){
+    try {
+      update(req, path.join(settings.root, req.headers['filename']), options, function(){
+        urlcache = {};
+        res.end("Received file: '" + req.headers['filename'] + "'");
+      });
+    }
+    catch(e) {
       urlcache = {};
-      res.end("Received file: '" + req.headers['filename'] + "'");
-    });
+      res.end("Update error on remote instance:\n" + e);
+    }
   }
 
   // Delete file
   else if(req.method === 'DELETE'){
-    utils.deleteFile(path.join(settings.root, req.headers['filename']), function(){
+    try {
+      utils.deleteFile(path.join(settings.root, req.headers['filename']), function(){
+        urlcache = {};
+        res.end("Deleted file: '" + req.headers['filename'] + "'");
+      });
+    }
+    catch(e) {
       urlcache = {};
-      res.end("Deleted file: '" + req.headers['filename'] + "'");
-    });
+      res.end("Delete error on remote instance:\n" + e);
+    }
   }
 });
-
 
 /* Serve static content and favicon */
 main.use('/favicon.ico', utils.serveFile(path.join(settings.root, 'static', 'favicon.ico'), {'Cache-Control':  'public, max-age=' + (84600 * 365)}));
