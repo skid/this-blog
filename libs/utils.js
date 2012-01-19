@@ -5,7 +5,6 @@ var fs        = require('fs');
 var marked    = require('marked');
 var connect   = require('connect');
 var templates = {};
-var cache     = global.cache;
 
 function formatDate(date, lang) {
   return global.settings.strings[lang].months[date.getMonth()] + " " + date.getDate() + ", " + date.getFullYear();
@@ -82,9 +81,9 @@ exports.deleteFile = function(filepath, callback){
     var chunks    = filename.split(".");
     var name      = chunks[0];
     var slug      = slugify(name);
-    var lang      = chunks.length === 3 ? chunks[1] : global.settings.languages[0];
+    var lang      = chunks.length === 3 ? chunks[1] : settings.languages[0];
     var i;
-
+    console.log(filename, name, slug, lang)
     delete cache.posts[slug][lang];
 
     if(Object.keys(cache.posts[slug]).length === 0){
@@ -183,10 +182,10 @@ exports.updatePost = function(stream, filepath, options, callback) {
     var chunks    = filename.split(".");
     var name      = chunks[0];
     var slug      = slugify(name);
-    var lang      = chunks.length === 3 ? chunks[1] : global.settings.languages[0];
+    var lang      = chunks.length === 3 ? chunks[1] : settings.languages[0];
     var headers   = {
-      link:       "/" + lang + global.settings.postsUrl + "/" + slug,
-      permalink:  global.settings.server + (global.settings.port !== 80 ? ":" + global.settings.port : "") + "/" + lang + global.settings.postsUrl + "/" + slug,
+      link:       "/" + lang + settings.postsUrl + "/" + slug,
+      permalink:  settings.server + (settings.port !== 80 ? ":" + settings.port : "") + "/" + lang + settings.postsUrl + "/" + slug,
       title:      name
     };
     var post    = {
@@ -288,8 +287,8 @@ exports.updatePost = function(stream, filepath, options, callback) {
     cache.order.sort(function(a, b){
       a = cache.posts[a];
       b = cache.posts[b];
-      a = a[global.settings.languages[0]] || a[global.settings.languages[1]];
-      b = b[global.settings.languages[0]] || b[global.settings.languages[1]];
+      a = a[settings.languages[0]] || a[settings.languages[1]];
+      b = b[settings.languages[0]] || b[settings.languages[1]];
       return (+b.meta.date || 0) - (+a.meta.date || 0);
     });
 
