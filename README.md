@@ -13,7 +13,7 @@
 
 ## Installation
 
-**Note: ** Since This Blog depends on connect >= 2.0.0 and that version is still published to NPM, the npm install will fail. Please checkout this git repository, cd into it and use npm to manually install the dependencies. You can checkout connect 2.0.0alpha elswhere and then link it into the `node_modules` directory.
+**Note:** Since This Blog depends on connect >= 2.0.0 and that version is still published to NPM, the npm install will fail. Please checkout this git repository, cd into it and use npm to manually install the dependencies. You can checkout connect 2.0.0alpha elswhere and then link it into the `node_modules` directory.
 
 To use it, you will have to make 2 installations, one on your server and one on your local machine:
 
