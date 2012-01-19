@@ -1,26 +1,31 @@
-{ 
-  "name":         "this-blog",
-  "description":  "A simple nodejs blog engine for programmers that like Markdown",
-  "author":       "Dusko Jordanovski <jordanovskid@gmail.com>",
-  "version":      "0.2.0",
-  "license":      "MIT", 
-  "keywords":     ["blog", "markdown", "static"],
+{
+  "name": "this-blog",
+  "description": "A simple nodejs blog engine for programmers that like Markdown",
+  "author": "Dusko Jordanovski <jordanovskid@gmail.com>",
+  "version": "0.2.0",
+  "license": "MIT",
+  "keywords": [
+    "blog",
+    "markdown",
+    "static"
+  ],
   "repository": {
-    "type": "git", 
-    "url":  "https://github.com/skid/this-blog" 
+    "type": "git",
+    "url": "git://github.com/skid/this-blog.git"
   },
   "dependencies": {
-    "mime":     ">=1.2.4",
-    "connect":  ">=2.0.0",
-    "marked":   ">=0.1.2",
+    "mime": ">=1.2.4",
+    "connect": ">=2.0.0",
+    "marked": ">=0.1.2",
     "optimist": ">=0.3.0",
-    "qs":       ">=0.4.0",
-    "winston":  ">=0.5.9"
+    "qs": ">=0.4.0",
+    "winston": ">=0.5.9"
   },
-  "scripts":      {
+  "scripts": {
     "start": "node blog.js -s"
   },
   "engines": {
     "node": ">= 0.6.0"
-  }
+  },
+  "devDependencies": {}
 }
