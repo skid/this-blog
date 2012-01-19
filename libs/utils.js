@@ -283,6 +283,7 @@ exports.updatePost = function(stream, filepath, options, callback) {
     
     // Sort the posts in the cache by date
     cache.order = Object.keys(cache.posts);
+    console.log(cache.posts)
     cache.order.sort(function(a, b){
       a = cache.posts[a];
       b = cache.posts[b];
