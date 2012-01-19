@@ -1,5 +1,5 @@
 { 
-  "name":         "Bloog",
+  "name":         "this-blog",
   "description":  "A simple nodejs blog engine for programmers that like Markdown",
   "author":       "Dusko Jordanovski <jordanovskid@gmail.com>",
   "version":      "0.2.0",
