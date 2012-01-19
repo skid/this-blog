@@ -77,7 +77,7 @@ exports.deleteFile = function(filepath, callback){
   delete templates[filepath.substr(settings.root.length + 1)];
   
   // Remove posts from cache, menus and tags
-  if(filename.substr(-2).toLowerCase() === 'md'){
+  if(filepath.substr(-2).toLowerCase() === 'md'){
     var filename  = filepath.substr(filepath.lastIndexOf("/") + 1);
     var chunks    = filename.split(".");
     var name      = chunks[0];
