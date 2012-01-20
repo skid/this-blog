@@ -59,7 +59,11 @@ exports.publish = function(){
         Object.keys(remoteChecksums).forEach(function(filename){
           var data = "", options = utils.extend(reqOpts, { 
             method: "DELETE", 
-            headers: { password: global.settings.password, filename: filename } 
+            headers: {
+              'content-length': 0,
+              'password':       global.settings.password, 
+              'filename':       filename 
+            } 
           });
     
           var req = http.request(options, function(res){
