@@ -9,7 +9,7 @@ var fs      = require('fs');
 var options = require('optimist').argv;
 var winston = require('winston');
 
-global.settings = JSON.parse(fs.readFileSync('settings.json', 'utf-8'));
+global.settings = JSON.parse(fs.readFileSync(path.join(__dirname, 'settings.json'), 'utf-8'));
 settings.root   = __dirname.replace(/\/+$/, "");
 global.cache    = { posts: {}, tags: {}, menus: {}, order: [], checksums: {} };
 global.logger   = new (winston.Logger)({
