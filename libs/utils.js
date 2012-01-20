@@ -93,9 +93,14 @@ exports.deleteFile = function(filepath, callback){
     var i;
 
     delete cache.posts[slug][lang];
-
+    
+    // Entirely remove post (no language versions left)
     if(Object.keys(cache.posts[slug]).length === 0){
       delete cache.posts[slug];
+      i = cache.order.indexOf(slug);
+      if(~i) {
+        cache.order.splice(i, 1);
+      }
 
       for(i in cache.tags){
         if(~cache.tags[i].indexOf(slug)){

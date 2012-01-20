@@ -115,10 +115,13 @@ exports.publish = function(){
           });
         });
       }
+
       if(res.statusCode === 404) {
         return  console.log("Not found. Did you change your password ?");
       }
-      console.log("Error: " + res.statusCode);
+      else if(res.statusCode !== 200){
+        console.log("Error: " + res.statusCode);
+      }
     });
   });
   req.on('error', function(e){

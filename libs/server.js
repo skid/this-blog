@@ -183,7 +183,7 @@ function list(req, res, next, tag){
   var tags = cache.tags[tag] || null;
   
   // Pagination parameters
-  var filpos = cache.order.filter(function(slug){ return req.language in cache.posts[slug]; });
+  var filpos = cache.order.filter(function(slug){ return slug in cache.posts && req.language in cache.posts[slug]; });
   var total  = tags ? filpos.filter(function(slug){ return ~tags.indexOf(slug); }).length : filpos.length;
   var page   = isNaN(req.query.p) ? 0 : parseInt(req.query.p);
   var offset = Math.max(0, Math.min(page * max, total));
