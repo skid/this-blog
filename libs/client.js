@@ -26,82 +26,6 @@ function lookupMime(filename){
 }
 
 /**
- * Calculates which files need to be uploaded or removed from the remote instance.
- * Uploads or deletes those files from remote instance.
- */
-function upload(remoteChecksums) {
-  var i, send = {};
-  for(i in cache.checksums) {
-    if(!(i in remoteChecksums) || remoteChecksums[i] !== cache.checksums[i]) {
-      send[i] = cache.checksums[i];
-      delete remoteChecksums[i];
-    }
-    else if(i in remoteChecksums) {
-      delete remoteChecksums[i];
-    }
-  }
-  
-  console.log("\nDeleting " + Object.keys(remoteChecksums).length + " items.");
-  
-  // Remove
-  Object.keys(remoteChecksums).forEach(function(filename){
-    var data = "", options = utils.extend(reqOpts, { method: "DELETE", headers: { password: global.settings.password, filename: filename } });
-    
-    var req = http.request(options, function(res){
-      res.on('data', function (chunk) { 
-        data += chunk; 
-      });
-      res.on('end', function(){ 
-        console.log(data); 
-      });
-    });
-    req.on('error', function(e){
-      console.log("An error happened while deleting file " + filename + "; Try publishing again.");
-      console.log("Error Code: " + e.code || e.errno);
-    });
-    req.end();
-  });
-
-  console.log("Uploading " + Object.keys(send).length + " items.\n");
-
-  // Send
-  Object.keys(send).forEach(function(filename){
-    var filepath = path.join(settings.root, filename);    
-    
-    fs.stat(filepath, function(e, stat) {
-      var options, req, data = "";
-
-      if (e) {
-        console.log("Error with local file: " + filename);
-        console.log("Error Code: " + e.code || e.errno);
-        return;
-      }
-      options = utils.extend(reqOpts, { 
-        "method":   "PUT", 
-        "headers":  { 
-          "content-length": stat.size,
-          "content-type":   lookupMime(filename),
-          "password":       global.settings.password, 
-          "filename":       filename 
-      }});
-      req = http.request(options, function(res){
-        res.on('data', function (chunk) { 
-          data += chunk; 
-        });
-        res.on('end', function(){ 
-          console.log( data ); 
-        });
-      });
-      req.on('error', function(e){
-        console.log("An error happened while sending file " + filename + "; Try publishing again.");
-        console.log("Error Code: " + e.code || e.errno);
-      });
-      fs.ReadStream(filepath).pipe(req);
-    });    
-  });
-}
-
-/**
  * Calculates local checksums, fetches remote checksums
  * and calls the upload function which will take care of the rest.
  */
@@ -117,7 +41,79 @@ exports.publish = function(){
     });
     res.on('end', function(){ 
       if(res.statusCode === 200) {
-        return upload(JSON.parse(data));
+        var i, send = {}, remoteChecksums = JSON.parse(data);
+        
+        for(i in cache.checksums) {
+          if(!(i in remoteChecksums) || remoteChecksums[i] !== cache.checksums[i]) {
+            send[i] = cache.checksums[i];
+            delete remoteChecksums[i];
+          }
+          else if(i in remoteChecksums) {
+            delete remoteChecksums[i];
+          }
+        }
+        
+        console.log("\nDeleting " + Object.keys(remoteChecksums).length + " items.");
+  
+        // Remove
+        Object.keys(remoteChecksums).forEach(function(filename){
+          var data = "", options = utils.extend(reqOpts, { 
+            method: "DELETE", 
+            headers: { password: global.settings.password, filename: filename } 
+          });
+    
+          var req = http.request(options, function(res){
+            res.on('data', function (chunk) { 
+              data += chunk; 
+            });
+            res.on('end', function(){ 
+              console.log(data); 
+            });
+          });
+          req.on('error', function(e){
+            console.log("An error happened while deleting file " + filename + "; Try publishing again.");
+            console.log("Error Code: " + e.code || e.errno);
+          });
+          req.end();
+        });
+
+        console.log("Uploading " + Object.keys(send).length + " items.\n");
+
+        // Send
+        Object.keys(send).forEach(function(filename){
+          var filepath = path.join(settings.root, filename);    
+    
+          fs.stat(filepath, function(e, stat) {
+            var options, req, data = "";
+
+            if (e) {
+              console.log("Error with local file: " + filename);
+              console.log("Error Code: " + e.code || e.errno);
+              return;
+            }
+            options = utils.extend(reqOpts, { 
+              "method":   "PUT", 
+              "headers":  { 
+                "content-length": stat.size,
+                "content-type":   lookupMime(filename),
+                "password":       global.settings.password, 
+                "filename":       filename 
+            }});
+            req = http.request(options, function(res){
+              res.on('data', function (chunk) { 
+                data += chunk; 
+              });
+              res.on('end', function(){ 
+                console.log( data ); 
+              });
+            });
+            req.on('error', function(e){
+              console.log("An error happened while sending file " + filename + "; Try publishing again.");
+              console.log("Error Code: " + e.code || e.errno);
+            });
+            fs.ReadStream(filepath).pipe(req);
+          });
+        });
       }
       if(res.statusCode === 404) {
         return  console.log("Not found. Did you change your password ?");
