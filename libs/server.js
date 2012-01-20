@@ -31,7 +31,7 @@ main.use(settings.adminUrl, function(req, res, next){
     res.writeHead(200, { 'content-type': 'text/json', 'content-length': Buffer.byteLength(json) });
     res.end(json);
   }
-  
+
   // Update or Create file
   else if(req.method === 'PUT'){
     if(!req.headers['filename'] || !req.headers['content-type']) {

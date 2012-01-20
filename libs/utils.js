@@ -138,7 +138,7 @@ exports.updateFile = function(stream, filepath, options, callback) {
   if(options.save){
     data = options.text ? "" : options.size ? new Buffer(options.size) : null;
   }
-
+  
   stream.on('data', function(part){
     if(options.save) {
       if(options.text) {
@@ -168,7 +168,7 @@ exports.updateFile = function(stream, filepath, options, callback) {
 
       fs.writeFile(filepath, data, 'utf-8', callback);
       if(filename === 'settings.json') {
-        global.settings = JSON.parse(data);
+        global.settings = extend(settings, JSON.parse(data));
       }
     }
     callback && callback();
