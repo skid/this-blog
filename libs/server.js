@@ -165,7 +165,9 @@ main.use(settings.postsUrl, function(req, res, next){
   
   // Render post in it's own template
   if(post.meta.template) {
+    console.log(post.meta.template)
     return utils.template(path.join(settings.root, 'templates', post.meta.template), req.context, function(err, content){
+      console.log(err)
       if(err) {
         return next(err.code === 'ENOENT' ? 404 : 500);
       }
