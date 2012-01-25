@@ -162,6 +162,7 @@ exports.updateFile = function(stream, filepath, options, callback) {
   stream.on('end', function(){
     var filename = filepath.substr(settings.root.length + 1);
     cache.checksums[filename] = hash.digest('hex');
+    
     if(options.save) {
       // Invalidate cache for templates
       delete templates[filename];

@@ -1,7 +1,6 @@
 /**
  * ThisBlog by "Dusko Jordanovski" <jordanovskid@gmail.com>
  * A simple blog for programmers that like Markdown and git.
- *
  */
 var utils     = require('./utils');
 var winston   = require('winston');
@@ -11,6 +10,7 @@ var url       = require('url');
 var fs        = require('fs');
 var qs        = require('qs');
 var connect   = require('connect');
+
 var urlcache  = {};
 var main      = connect();
 
@@ -25,6 +25,7 @@ main.use(settings.adminUrl, function(req, res, next){
   if(req.headers.password !== settings.password) {
     return next(404);
   }
+  
   // Get the served files' checksums to decide what files need to be sent.
   if(req.method === 'GET'){
     var json = JSON.stringify(cache.checksums);
@@ -150,16 +151,6 @@ main.use(settings.postsUrl, function(req, res, next){
   if(!(req.method === 'GET' && slug && (post = cache.posts[slug]) && (post = post[req.language]))){
     return next(404);
   }
-  // Render post in it's own template
-  if(post.meta.template) {
-    return utils.template(path.join(settings.root, 'templates', post.meta.template), post, function(err, content){
-      if(err) {
-        return next(err.code === 'ENOENT' ? 404 : 500);
-      }
-      return res.end(html);
-    });
-  }
-
   req.context.content     = "<span class='label date'>" + post.meta.fdate + "</span><h1>" + post.meta.title + "</h1>" + post.content;
   req.context.title       = post.meta.title;
   req.context.author      = post.meta.author || settings.strings[req.language].author;
@@ -171,7 +162,17 @@ main.use(settings.postsUrl, function(req, res, next){
       }).join(""),
     "</ul>"
   ].join("");
-
+  
+  // Render post in it's own template
+  if(post.meta.template) {
+    return utils.template(path.join(settings.root, 'templates', post.meta.template), req.context, function(err, content){
+      if(err) {
+        return next(err.code === 'ENOENT' ? 404 : 500);
+      }
+      return res.end(html);
+    });
+  }
+  
   next();
 });
 
@@ -295,7 +296,7 @@ main.use('/', function(err, req, res, next){
     if(err.status !== 404) {
       var error = winston.exception.getAllInfo(err);
       error.path    = req.url;
-      error.time    = (new Date())
+      error.time    = (new Date());
       error.headers = req.headers;
       error.remoteAddress = req.socket.remoteAddress;
       logger.error(error);

@@ -36,10 +36,15 @@ exports.publish = function(){
 
   console.log("Fetching remote checksums ...");
   req = http.request(options, function(res){
+    
     res.on('data', function (chunk) { 
       data += chunk; 
     });
+    
     res.on('end', function(){ 
+      
+      // On successful GET of remote checksums, compare them and send 
+      // files that have been added / changed / removed
       if(res.statusCode === 200) {
         var i, send = {}, remoteChecksums = JSON.parse(data);
         
@@ -67,17 +72,15 @@ exports.publish = function(){
           });
     
           var req = http.request(options, function(res){
-            res.on('data', function (chunk) { 
-              data += chunk; 
-            });
-            res.on('end', function(){ 
-              console.log(data); 
-            });
+            res.on('data', function (chunk) { data += chunk; });
+            res.on('end', function(){ console.log(data); });
           });
+
           req.on('error', function(e){
-            console.log("An error happened while deleting file " + filename + "; Try publishing again.");
+            console.log("An error happened while issuing a delete request for " + filename + "; Try publishing again.");
             console.log("Error Code: " + e.code || e.errno);
           });
+          
           req.end();
         });
 
@@ -103,35 +106,43 @@ exports.publish = function(){
                 "password":       global.settings.password, 
                 "filename":       filename 
             }});
+            
             req = http.request(options, function(res){
-              res.on('data', function (chunk) { 
-                data += chunk; 
-              });
-              res.on('end', function(){ 
-                console.log( data ); 
-              });
+              res.on('data', function (chunk) { data += chunk; });
+              res.on('end', function(){ console.log( data ); });
             });
+            
             req.on('error', function(e){
-              console.log("An error happened while sending file " + filename + "; Try publishing again.");
+              console.log("An error happened issuing a PUT request for file " + filename + "; Try publishing again.");
               console.log("Error Code: " + e.code || e.errno);
             });
+            
             fs.ReadStream(filepath).pipe(req);
           });
         });
       }
-
-      if(res.statusCode === 404) {
+      
+      // If the remote server responds with a 404 to the checksum fetch, then we 
+      // most probably have a different password on the local installation
+      else if(res.statusCode === 404) {
         return  console.log("Not found. Did you change your password ?");
       }
+      
+      // Otherwise some error happened
       else if(res.statusCode !== 200){
         console.log("Error: " + res.statusCode);
       }
+
     });
   });
+  
   req.on('error', function(e){
+    
     console.log("An error happened while fetching remote checksums; Check if your server is online.");
     console.log("Error Code: " + e.code || e.errno);
     process.exit(1);
+    
   });
+  
   req.end();
 }
