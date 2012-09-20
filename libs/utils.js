@@ -88,7 +88,7 @@ exports.deleteFile = function(filepath, callback){
   
   // Remove posts from cache, menus and tags
   if(filepath.substr(-2).toLowerCase() === 'md'){
-    var filename  = filepath.substr(filepath.lastIndexOf("/") + 1);
+    var filename  = filepath.substr(filepath.lastIndexOf(path.sep) + 1);
     var chunks    = filename.split(".");
     var name      = chunks[0];
     var slug      = slugify(name);
@@ -193,7 +193,7 @@ exports.updatePost = function(stream, filepath, options, callback) {
 
   stream.on('end', function() {
     // Get infor from filename
-    var filename  = filepath.substr(filepath.lastIndexOf("/") + 1);
+    var filename  = filepath.substr(filepath.lastIndexOf(path.sep) + 1);
     var chunks    = filename.split(".");
     var name      = chunks[0];
     var slug      = slugify(name);
