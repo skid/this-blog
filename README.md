@@ -69,7 +69,7 @@ Here's an overview of the configuration options in the `settings.json` file:
     sitemenus:   List of menus that posts can appear in - ["bookmarks", "2011"]
     strings:     A hash of stranslation strings for each language
 
-Appart from the `settings.json` file, you can also configure your posts individually by using headers. A post filename should look like this:
+Apart from the `settings.json` file, you can also configure your posts individually by using headers. A post filename should look like this:
 
     This is my first post.en.md
 
