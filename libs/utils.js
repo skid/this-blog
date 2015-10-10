@@ -4,7 +4,10 @@ var path      = require('path');
 var fs        = require('fs');
 var marked    = require('marked');
 var connect   = require('connect');
+var os        = require('os');
 var templates = {};
+
+var double_EOL = os.EOL + os.EOL;
 
 /**
  * Formats a date object
@@ -85,7 +88,7 @@ exports.deleteFile = function(filepath, callback){
   
   // Remove posts from cache, menus and tags
   if(filepath.substr(-2).toLowerCase() === 'md'){
-    var filename  = filepath.substr(filepath.lastIndexOf("/") + 1);
+    var filename  = filepath.substr(filepath.lastIndexOf(path.sep) + 1);
     var chunks    = filename.split(".");
     var name      = chunks[0];
     var slug      = slugify(name);
@@ -190,7 +193,7 @@ exports.updatePost = function(stream, filepath, options, callback) {
 
   stream.on('end', function() {
     // Get infor from filename
-    var filename  = filepath.substr(filepath.lastIndexOf("/") + 1);
+    var filename  = filepath.substr(filepath.lastIndexOf(path.sep) + 1);
     var chunks    = filename.split(".");
     var name      = chunks[0];
     var slug      = slugify(name);
@@ -211,7 +214,7 @@ exports.updatePost = function(stream, filepath, options, callback) {
     };
 
     // Parse headers
-    data.substr(0, data.indexOf("\n\n")).split("\n").forEach(function(header){
+    data.substr(0, data.indexOf(double_EOL)).split(os.EOL).forEach(function(header){
       var hdata, k, v, kv = header.split(":");
       // Invalid header syntax
       if(kv.length < 2) {
@@ -236,8 +239,8 @@ exports.updatePost = function(stream, filepath, options, callback) {
     });
 
     // Parse and compile markdown content
-    chunks = data.substr(data.indexOf("\n\n") + 2).split("\n\n-----\n\n");
-    post.content = marked(chunks.join("\n\n"));
+    chunks = data.substr(data.indexOf(double_EOL) + 2).split(double_EOL + "-----" + double_EOL);
+    post.content = marked(chunks.join(double_EOL));
     post.excerpt = chunks.length > 1 ? marked(chunks[0]) : post.content;
 
     // Put compled post in cache

@@ -32,9 +32,35 @@ console.log("Updating local files cache ...");
 utils.updateFile(fs.ReadStream(path.join(settings.root, 'settings.json')), path.join(settings.root, 'settings.json'));
 
 var counter = 0;
+
 settings.contentDirs.forEach(function(dir){
+
+  if (settings.watchFiles) {
+    // we want to watch files, so there is no need to use caching for posts
+    settings.useCaching = false;
+
+    var files = fs.readdirSync(dir);
+    var containsMarkdown = false;
+
+    for (var i = 0; i < files.length; i++) {
+      if (files[i].substr(-2).toLowerCase() === 'md') {
+        containsMarkdown = true;
+        break;
+      }
+    }
+
+    if (containsMarkdown) {
+      fs.watch(dir, function(event, filename) {
+        if (filename && filename.substr(-2).toLowerCase() === 'md' && event === 'change') {
+          console.log("[" + event + "] " + "Updating " + filename + " ...");
+          var completeFileName = path.join(dir, filename);
+          utils.updatePost(fs.ReadStream(completeFileName), completeFileName, {}, null);
+        }
+      });
+    }
+  }
+
   utils.crawl(path.join(settings.root, dir), function(filepath){
-    
     counter++;
     utils[filepath.substr(-2).toLowerCase() === 'md' ? 'updatePost' : 'updateFile'](fs.ReadStream(filepath), filepath, {}, function(){
       if(--counter){

@@ -84,9 +84,11 @@ main.use('/', function(req, res, next){
   req.mobile = /iphone|ipad|android|phone|mobile/i.test(req.headers['user-agent']);
 
   // Caching in memory - the whole cache is invalidated on any change
-  if(req.url in urlcache) {
-    res.writeHead(200, urlcache[req.url].headers)
-    return res.end(urlcache[req.url].body);
+  if (settings.useCaching) {
+    if(req.url in urlcache) {
+      res.writeHead(200, urlcache[req.url].headers)
+      return res.end(urlcache[req.url].body);
+    }
   }
 
   req.origUrl = req.url;
@@ -162,7 +164,7 @@ main.use(settings.postsUrl, function(req, res, next){
       }).join(""),
     "</ul>"
   ].join("");
-  
+
   // Render post in it's own template
   if(post.meta.template) {
     return utils.template(path.join(settings.root, 'templates', post.meta.template), req.context, function(err, html){

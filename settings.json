@@ -13,6 +13,8 @@
   "errorLog":    "error.log",
   "maxExcerpts": 2,
   "pagination":  9,
+  "watchFiles":  true,
+  "useCaching":  true,
   "languages":   ["en", "mk"],
   "langinfo":    {"en": "English", "mk": "Македонски"},
   "sitemenus":   ["bookmarks"],
